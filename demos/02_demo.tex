@@ -1,0 +1,268 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{1em}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+	language=Python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\newenvironment{question}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Question #1:}
+	\noindent}
+{\medskip}
+
+\newenvironment{solution}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Solution #1:}
+	\noindent}
+{\medskip}
+
+\begin{document}
+
+\leftline{\bfseries Introduction à l'algorithmique \hfill Automne 2017}
+
+\noindent \hrulefill
+
+\leftline{IFT2125-6001 \hfill TA: Stéphanie Larocque}
+
+\centerline{\bfseries Démonstration 2}
+\centerline{À partir des corrigés de Maelle Zimmermann}
+\noindent \hrulefill
+
+\vspace{1cm}
+
+\section{}
+
+\begin{question}
+	Soit $0<\epsilon<1$. Utiliser les relations $\subset$ et $=$ afin d'ordonner les $O$ des fonctions suivantes et démontrer la solution (en utilisant si nécessaires les théorèmes sur les limites, voir démonstration 1).
+	$$n\log n \quad n^8 \quad n^{1+\epsilon} \quad (1+\epsilon)^n \quad n^2/\log n \quad (n^2-n+1)^4$$
+\end{question}
+
+\begin{solution}
+	La solution est
+	\begin{equation*}
+	O(n\log n) \subset O(n^{1+\epsilon}) \subset O(n^2/\log n) \subset O(n^8) = O((n^2-n+1)^4) \subset O((1+\epsilon)^n)
+	\end{equation*}
+	On peut démontrer chaque inclusion point par point en utilisant les théorèmes vus sur les limites et la règle de L'Hôpital.
+	\begin{itemize}
+		\item[(a)] \begin{equation*}
+		\lim\limits_{n\rightarrow \infty}\frac{n^{1+\epsilon}}{n\log n}
+		=\lim\limits_{n\rightarrow \infty}\frac{n^{\epsilon}}{\log n}
+		=\lim\limits_{n\rightarrow \infty}\frac{\epsilon n^{\epsilon-1}}{1/n}
+		=\underbrace{\lim\limits_{n\rightarrow \infty}\epsilon n^{\epsilon}=+\infty}_{\text{car }\epsilon>0}.
+		\end{equation*}
+		\item[(b)] 
+		\begin{equation*}
+		\lim\limits_{n\rightarrow \infty}\frac{n^2/\log n}{n^{1+\epsilon}}
+		=\lim\limits_{n\rightarrow \infty}\frac{n^{1-\epsilon}}{\log n}
+		=\lim\limits_{n\rightarrow \infty}\frac{(1-\epsilon)n^{-\epsilon}}{1/n}
+		=\underbrace{\lim\limits_{n\rightarrow \infty}{(1-\epsilon)n^{1-\epsilon}}=+\infty}_{\text{car }1-\epsilon>0}.
+		\end{equation*}
+		\item[(c)]
+		\begin{equation*}
+		\lim\limits_{n\rightarrow \infty}\frac{n^8}{n^2/\log n}
+		=\lim\limits_{n\rightarrow \infty}n^6 \log n = +\infty.
+		\end{equation*} 
+		\item[(d)] Ici à la place d'utiliser le calcul de limites qui nécessiterait d'appliquer de nombreuses fois la règle de l'Hôpital, on peut utiliser la définition de $O(f(n))$.
+		\begin{align*} 
+		(n^2 - n +1)^4 &= n^8 -4n^7 +10n^6 -16n^5 + 19n^4 -16n^3 +10n^2 -4n +1\\
+		&\leq n^8+10n^6 + 19n^4 +10n^2 + 1\\
+		&\leq n^8 + 10n^8 +19n^8 +10n^8 + n^8\\
+		&=41n^8.
+		\end{align*}
+		Ainsi par définition $(n^2 - n +1)^4 \in O(n^8)$. De plus,
+		\begin{align*}
+		(n^2 - n +1)^4 &= n^8 -4n^7 +10n^6 -16n^5 + 19n^4 -16n^3 +10n^2 -4n +1\\
+		&\geq n^8 - (4n^7+16n^5+16n^3+4n)\\
+		&\geq n^8 - 40n^7\\
+		&\geq n^8 - (1/2)n^8 \quad \text{car }80n^7 \leq n^8 \quad \forall n\geq 80\\
+		&=(1/2)n^8
+		\end{align*}
+		Ainsi $n^8 \leq 2(n^2-n+1)^4$ $\forall n\geq n_0=80$, et donc $n^8 \in O((n^2-n+1)^4)$.
+
+\vfill
+Une autre façon de le voir serait ainsi:
+\begin{align*}
+\lim\limits_{n\rightarrow \infty} \frac{(n^2-n+1)^4}{n^8} &= \lim\limits_{n\rightarrow \infty} \frac{(n^2(1-n/n^2+1/n^2))^4}{n^8}\\
+&=\lim\limits_{n\rightarrow \infty} \frac{n^8(1-n/n^2+1/n^2)^4}{n^8}\\ 
+&= \lim\limits_{n\rightarrow \infty} (1-n/n^2+1/n^2)^4 = \lim\limits_{n\rightarrow \infty} (1-1/n+1/n^2)^4 =1  \in \mathbb{R} .
+\end{align*}
+Et donc on aurait $\Theta(n^8) = \Theta((n^2-n+1)^4)$ car la limite  $\in \mathbb{R}$.
+
+\item[(e)]
+		Posons $b=1+\epsilon$.
+		\begin{align*}
+		\lim\limits_{n\rightarrow \infty}\frac{b^n}{n^8}
+		&=\lim\limits_{n\rightarrow \infty}\frac{\ln b\cdot  b^n}{8n^7}\\
+		&=\lim\limits_{n\rightarrow \infty}\frac{(\ln b)^2\cdot  b^n}{8\cdot 7n^6}\\
+		&=\ \dots\\
+		&=\lim\limits_{n\rightarrow \infty}\frac{(\ln b)^8\cdot  b^n}{8!}\\
+		&=+\infty
+		\end{align*}
+	\end{itemize}
+\end{solution}
+
+\section{}
+\begin{question}
+	Soit $0<\epsilon<1$. Utiliser les relations $\subset$ et $=$ afin d'ordonner les $O$ des fonctions suivantes et démontrer la solution (en utilisant si nécessaires les théorèmes sur les limites, voir démonstration 1).
+	$$n! \quad (n+1)! \quad 2^n \quad 2^{n+1} \quad 2^{2n} \quad n^n \quad n^{\sqrt{n}} \quad n^{\log n}$$
+\end{question}
+
+\begin{solution}
+	La solution est
+	$$O(n^{\log n})\subset O(n^{\sqrt{n}}) \subset O(2^n)=O(2^{n+1})\subset O(2^{2n}) \subset O(n!) \subset O((n+1)!) \subset O(n^n)$$
+	
+	\underline{A parté:} Il est utile de montrer pour commencer que $\forall d,c  \in \mathbb{R}^{>0},\ \exists n_0\in \mathbb{N} : \forall n\geq n_0, \ c(\log n) \leq n^d$. En effet, $\forall d,c  \in \mathbb{R}^{>0}$ nous avons:
+	$$\lim\limits_{n\rightarrow \infty}\frac{c\log n}{n^d}=\lim\limits_{n\rightarrow \infty}\frac{c/n}{dn^{d-1}}=\lim\limits_{n\rightarrow \infty}\frac{c}{dn^d}=0.$$ 	
+	Nous pouvons en conclure (par la définition rigoureuse d'une limite) que
+	$$\forall \epsilon>0,\ \exists n_0 \in \mathbb{N} : \forall n\geq n_0,\ \frac{c\log n}{n^d} < \epsilon.$$	
+	En prenant $\epsilon=1$ on a démontré l'assertion.
+	
+	On démontre ensuite chaque inclusion point par point comme dans l'exercice précédent.
+	\begin{itemize}
+		\item[(a)] Nous avons prouvé que $(\forall d,c \in \mathbb{R}^{>0}) \ \exists n_0\in \mathbb{N} : \forall n\geq n_0, \ c(\log n) \leq n^d$. Ainsi pour $n$ suffisamment grand, on peut borner $\log n$ par $\frac{1}{2}\sqrt{n}$:
+		\begin{equation*}
+		0\leq \frac{n^{\log n}}{n^{\sqrt{n}}}\leq \frac{n^{\frac{1}{2}\sqrt{n}}}{n^{\sqrt{n}}}=\frac{1}{n^{\frac{1}{2}\sqrt{n}}}
+		\end{equation*}
+		Comme 
+		$$\lim\limits_{n\rightarrow \infty}\frac{1}{n^{\frac{1}{2}\sqrt{n}}}=0$$
+		on obtient que 
+		$$\lim\limits_{n\rightarrow \infty}\frac{n^{\log n}}{n^{\sqrt{n}}}=0$$ 
+		\item[(b)]
+		Pour $n$ suffisamment grand:
+		\begin{align*}
+		n^{\sqrt{n}}&=2^{\sqrt{n}\log_2 n}&\\
+		&=2^{c\sqrt{n}\log n}& \text{car } \log_2n=\log n/\log 2\\
+		&\leq 2^{n^{\frac{3}{4}}}& \text{car }c\log n \leq n^{1/4} \text{ pour }n\text{ suff. grand}
+		\end{align*}
+		Ainsi pour $n$ suffisamment grand:
+		$$0\leq\frac{n^{\sqrt{n}}}{2^n}\leq\frac{2^{n^{\frac{3}{4}}}}{2^n}= \frac{2^{n^{\frac{3}{4}}}}{2^{n^{\frac{3}{4}}n^{\frac{1}{4}}}}=
+		\frac{1}{2^{n^{\frac{3}{4}}(n^{\frac{1}{4}}-1)}}$$
+		Comme 
+		$$\lim\limits_{n\rightarrow \infty}\frac{1}{2^{n^{\frac{3}{4}}(n^{\frac{1}{4}}-1)}}=0$$
+		on obtient que 
+		$$\lim\limits_{n\rightarrow \infty}\frac{n^{\sqrt{n}}}{2^n}=0.$$
+		
+	\vfill
+	Une autre façon de résoudre cette inclusion sans utiliser la propriété prouvée plus haut serait d'utiliser les propriétés suivantes:  $x = \exp(\ln(x))$, $\ \ln(x^c) = c\ln(x)$ et  $\ln(x)\leq \sqrt{x}$. On a donc:
+\begin{align*}
+0 \leq \frac{n^{\sqrt{n}}}{2^n} &= \exp( \ln(   \frac{n^{\sqrt{n}}}{2^n} )) = \exp( \sqrt{n}\ln(n)-n\ln(2)) \\
+&\leq \exp(\sqrt{n} \sqrt{n}-n\ln(2)) = \exp(n(1-\ln(2)))
+\end{align*}
+Comme 
+		$$\lim\limits_{n\rightarrow \infty} \exp(n(1-\ln(2)))=0$$
+		on obtient que 
+		$$\lim\limits_{n\rightarrow \infty}\frac{n^{\sqrt{n}}}{2^n}=0.$$
+
+\item [(c)] Nous l'avons prouvé lors de la démonstration 1.
+		\item [(d)] 
+		\begin{equation*}
+		\lim\limits_{n\rightarrow \infty}\frac{2^{2n}}{2^n}
+		=\lim\limits_{n\rightarrow \infty}\frac{4^{n}}{2^n}
+		=\lim\limits_{n\rightarrow \infty}\left(\frac{4}{2}\right)^n
+		=\lim\limits_{n\rightarrow \infty}{2^n}
+		=+\infty.
+		\end{equation*}
+		\item[(e)]
+		Pour $n\geq 4$, nous avons
+		\begin{equation*}
+		\frac{n!}{4^n}
+		=\frac{n\cdot n-1 \dots 2 \cdot 1}{4\cdot 4 \dots 4\cdot 4}
+		\geq\frac{n}{4} \cdot\frac{3}{4} \cdot\frac{2}{4} \cdot\frac{1}{4}
+		\end{equation*}
+		car $k/4\geq 1$ pour $4\leq k\leq n$. Comme
+		$$\lim\limits_{n\rightarrow \infty} \frac{n}{4} \cdot\frac{3}{4} \cdot\frac{2}{4} \cdot\frac{1}{4} = +\infty, $$
+		on obtient 
+		$$\lim\limits_{n\rightarrow \infty}\frac{n!}{4^n} = +\infty.$$
+		\item[(f)]
+		\begin{equation*}
+		\lim\limits_{n\rightarrow \infty}\frac{(n+1)!}{n!}
+		=\lim\limits_{n\rightarrow \infty}\frac{(n+1)\cdot n \cdot (n-1) \dots 2 \cdot 1}{n \cdot (n-1) \dots 2 \cdot 1}
+		=\lim\limits_{n\rightarrow \infty}n+1 = +\infty.
+		\end{equation*}
+		\item[(g)]
+		Nous avons
+		\begin{equation*}
+		\frac{n^n}{(n+1)!}= \frac{n}{2}\cdot \frac{n}{3} \dots \frac{n}{n+1} \geq \frac{n}{4}
+		\end{equation*}
+		car $n/k \geq 1$ pour $3\leq k \leq n$ et $n/(n+1)\geq 1/2$.
+		Comme
+		$$\lim\limits_{n\rightarrow \infty} \frac{n}{4}=+\infty$$
+		on obtient
+		$$\lim\limits_{n\rightarrow \infty} \frac{n^n}{(n+1)!}=+\infty$$ 
+	\end{itemize}
+\end{solution}
+
+\section{}
+\begin{question}
+	Donner explicitement avec preuve deux fonctions $f,g: \mathbb{N} \rightarrow \mathbb{R}^{\geq 0}$ telles que $f \notin O(g)$ et $g\notin O(f)$.
+\end{question}
+
+\textcolor{red}{Note.  La solution donnée en TP (avec $f(n) = 0 $ lorsque $n$ est impair et $g(n)=0$ lorsque $n$ est pair) est un autre exemple valide.}
+\begin{solution}
+	Soient
+	$$f(n)=\left\{
+	\begin{array}{ll}
+	n & \text{si } n \text{ est pair}\\
+	1 & \text{sinon }
+	\end{array} \right. \quad \text{et } \quad g(n)=\left\{
+	\begin{array}{ll}
+	1 & \text{si } n \text{ est pair}\\
+	n & \text{sinon }
+	\end{array} \right.$$
+	Supposons que $f \in O(g(n))$. Alors il existe $n_0 \in \mathbb{N}, c \in \mathbb{R}^{>0}$ tels que $f(n) \leq cg(n)$, $\forall n\geq n_0.$ Soit $k=2\max(n_0,\lceil c \rceil)$. Alors comme $k$ est pair 
+	$$f(k)=k=2\max(n_0,\lceil c \rceil)> c = cg(k).$$
+	Ceci est une contradiction car $k \geq n_0$. Nous concluons que $f \notin O(g)$.
+	
+	De façon symétrique, on peut prouver que $g\notin O(f)$.
+\end{solution}
+
+\section{}
+\begin{question}
+	Exécuter l'algorithme intelligent de permutations pour déterminer si $(1345)$ appartient à l'ensemble de permutations généré par $\{(12),(12345)\}$. Justifier le temps d'exécution de cet algorithme.
+\end{question}
+
+Voir fichier python/notebook pour l'implémentation en python et notes de cours pour le pseudocode.
+
+Le temps d'exécution de l'algorithme intelligent des permutations est $O(m^6)$, où $m$ est la taille des permuations.
+
+Tamiser une permutation prend $O(m^2)$, car il y aura, en pire cas, $O(m)$ collisions (car on descend d'une ligne au moins à chaque collision), et traiter chaque collision prend $O(m)$ opérations, qui correspondent à calculer l'inverse ($O(m)$) + effectuer le produit des 2 permutations ($O(m)$ aussi).
+
+L'algorithme effectuera en pire cas $O(m^4)$ tamisages. Puisque le tableau est de taille $m^2$, bien qu'on ne remplisse que la partie supérieure du tableau, on a tout de même $O(m^2)$ cases à (possiblement) remplir et considérer. Puisqu'on doit effectuer le produit de toutes les paires de permutations dans le tableau, et ayant $O(m^2)$ permutations dans ce tableau, on aura en pire cas $O(m^4)$ produits de permutations à tamiser (chacune des permutations présentes dans le tableau avec chacune des autres permutations présentes).
+
+Finalement, puisqu'on effectuera en pire cas $O(m^4)$ tamisages, et que chaque tamisage s'effectue en pire cas en $O(m^2)$, alors cet algorithme s'effectue en $O(m^6)$.
+
+\end{document}

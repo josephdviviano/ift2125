@@ -1,0 +1,283 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{1em}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+	language=Python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\newenvironment{question}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Question #1:}
+	\noindent}
+{\medskip}
+
+\newenvironment{solution}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Solution #1:}
+	\noindent}
+{\medskip}
+
+\begin{document}
+	\leftline{\bfseries Introduction à l'algorithmique \hfill Hiver 2018}
+
+	\noindent \hrulefill
+	\leftline{IFT2125-6001 \hfill TA: Stéphanie Larocque}
+	\centerline{\bfseries Démonstration 7}
+	\centerline{À partir des corrigés de Maelle Zimmermann}
+	\noindent \hrulefill
+
+	\vspace{1cm}
+		\section{}
+	\begin{question}
+		Suppose we have access to the following algorithms:
+		\begin{itemize}
+			\item {\verb|mult_k1|: multiply a polynomial of degree $ k $ with a polynomial of degree 1 in a time $ O (k) $,}
+			\item{\verb|mult_kk|: multiply two polynomials of degree $ k $ in a time $ O (k \log k) $.}
+		\end{itemize}
+		Let $ z_1, ..., z_d \in \mathbb {Z} $. Give an efficient algorithm that calculates the unique polynomial $$ p (n) = a_0 + a_1 n + ... + a_d n ^ d $$ such that $ a_d = 1 $ and $ p (z_1) = ... = p (z_d) = 0. $ Note that we will represent a polynomial $ a_0 + a_1 n + ... + a_d n ^ d $ by the array $ [a_0, a_1, ..., a_d] $. Analyze the effectiveness of the algorithm.
+	\end{question}
+	\begin{solution}
+		Just calculate the polynomial $$ p (n) = (n-z_1) (n-z_2) (n-z_3) ... (n-z_d) $$. This polynomial actually has $ z_1, z_2, \dots z_d $ as roots and its coefficient $ a_d = 1 $, by construction. It is therefore the only polynomial respecting the conditions requested. The question is to give an efficient algorithm to calculate this product.\\
+
+		The idea is to separate the product into 2 subparts on which the recursive call will be made. If necessary (if $ d $ is odd), multiply the polynomial obtained by $ (n-z_d) $. Note that we must separate the polynomial into 2 parts of the same degree, given that we only have access to an algorithm to multiply 2 polynomials of the same size.
+
+
+		Voici un tel algorithme:
+		\begin{lstlisting}
+		def zeros(Z=[z1,z2,z3,...,zd]):
+			if len(Z) == 0:
+				return [1]
+			elif len(Z) == 1:
+				return [-Z[0], 1]		    #Retourne le polynome p(n) = n-z1
+			else:
+				m = len(Z) // 2			 #Afin d'avoir 2 polynomes de meme degre
+				p1 = zeros(Z[:m])			 #m premieres racines
+				p2 = zeros(Z[m:2*m]) 	 #m racines suivantes
+				p = mult_kk(p1,p2)
+				if len(Z)%2==1: 			 #nombre impair de zeros
+					r = [-Z[-1], 1]		 #p(n) = n - zd
+					p = mult_k1(p,r)
+				return p
+		\end{lstlisting}
+		The execution time of \verb | zeros | is described by the following recurrence:
+		\begin{equation*}
+		t(d) = \left\{
+		\begin{array}{ll}
+		1 & \text{si } d \leq 1,\\
+		2t(\lfloor\frac{d}{2}\rfloor)+f(\lfloor\frac{d}{2}\rfloor) & \text{si } d> 1 \text{ et est pair}, \\
+		2t(\lfloor\frac{d}{2}\rfloor)+ t(1) + f(\lfloor\frac{d}{2}\rfloor) + g(d-1) & \text{si } d> 1 \text{ et est impair}
+		\end{array} \right.
+		\end{equation*}
+		where $ f(d) \in O (d \log d) $ is the execution time of \verb | mult_kk | and $ g(d) \in O (d) $ is the execution time of \verb | mult_k1 |.
+
+		Ainsi,
+		\begin{equation*}
+		t(d) \in \left\{
+		\begin{array}{ll}
+		1 & \text{si } d \leq 1,\\
+		2t(\lfloor\frac{d}{2}\rfloor)+O(d\log d) & \text{si } d> 1.
+		\end{array} \right.
+		\end{equation*}
+
+		Let's apply the theorems on recurrences seen in class. We have $ a = 2, b = 2 $ and $ f (d) = d \log d $. Let's put $ \epsilon = $ 1. Since $ f (d) \in O (d \log d) = O (d ^ {\log_b a} (\log d) ^ {\epsilon}) $, we conclude that $ t (d) \in O ( d ^ {\log_b a} (\log d) ^ {\epsilon + 1}) = O (d (\log d) ^ 2) $.
+
+	\end{solution}
+
+
+	\section{}
+	\begin{question}
+		An $ n-tally $ circuit is a circuit that takes $ n $ bits as input and produces $ 1 + \lfloor \log n \rfloor $ bits as output. It counts in binary the number of bits equal to 1 in the input. For example, if $ n = 9 $ and the entry is $ 011001011 $, then there are 5 bits equal to 1, and the output is $ 0101 $ (5 in binary).
+
+		A $ (i, j) -adder $ is a circuit that takes a number $ m $ from $ i $ bits and a number $ n $ from $ j $ bits input. It calculates $ m + n $ in binary on $ 1 + \max (i, j) $ output bits. For example, if the entry is $ m = $ 101 and $ n = $ 10111 ($ i = $ 3, $ j = $ 5), the exit is the sum of the two numbers, $ 011100 $.
+
+		It is always possible to construct a $ (i, j) -adder $ from exactly $ \max (i, j) $ $ 3-tallies $. In fact, adding $ m + n $ amounts to counting for each position $ k $ the number of bits equal to 1 among the $ k $ th bit of $ m $, the $ k $ th bit of $ n $, and the possible retaining bit. Since the calculation must be done for $ \max (i, j) $ $ k $ positions we need $ \max (i, j) $ $ 3-$ tallies.
+
+		\begin{enumerate}
+			\item {Use $ 3-tallies $ and $ (i, j) -adders $ to build an effective $ n-tally $.}
+			\item{Give a recurrence (with initial condition) that describes the number of $ 3-tallies $ needed to build the $ n-tally $, including the $ 3-tallies $ that are part of the $ (i, j) -adders $.}
+			\item{Solve the recurrence exactly.}
+		\end{enumerate}
+	\end{question}
+
+
+	\begin{solution}
+		\begin{enumerate}
+
+		\item{Assume access to algorithms \verb | 3_tally | and \verb | ij_adder |. We build a \verb | n_tally | recursively as follows:}
+
+		\begin{lstlisting}
+		def n_tally(x):
+			n = len(x)
+			if 1<=x<=3:
+				return 3_tally(x)
+			else:
+				m = n//2							# m = floor(n/2)
+				x1 = n_tally(x[:m])			# taille floor(n/2)
+				x2 = n_tally(x[m:])			# taille ceil(n/2)
+				x3 = ij_adder(x1, x2)
+				return x3
+		\end{lstlisting}
+
+		The basic case is when $ 1 \leq n \leq $ 3, because we can directly use a \verb|3_tally| in that case. In other cases, the entry is separated into 2 (respectively of sizes $ \left\lfloor \dfrac{n}{2} \right\rfloor $ and $ \left\lceil \dfrac{n}{2} \right\rceil $), each counting the number of bits "1" in their input. The result of these two $ tallies $ is summed by a $ (i,j)-adder $ where $ i = 1 + \lfloor \log \lfloor n / 2 \rfloor \rfloor $ and $ j = 1 + \lfloor \log \lceil n / 2 \rceil \rfloor $.
+
+
+		\item {Let $ t (n) $ be the number of $ 3-tallies $ used to construct a $ n-tally $ in the construct given in (1). When $ 1 \leq n \leq $ 3, only one $ 3-tally $ is used. When $ n> 3 $ the number of $ 3-tallies $ used is $ t (\lceil n / 2 \rceil) + t (\lfloor n / 2 \rfloor) $, plus the number of $ 3-tallies $ used in order to build the $ (i, j) -adder $, that is, $ \max (i, j) $. Since $ i = 1 + \lfloor \log \lceil n / 2 \rceil \rfloor $ and $ j = 1 + \lfloor \log \lfloor n / 2 \rfloor \rfloor $, we get
+				\begin{equation}
+				t(n)=\left\{
+				\begin{array}{ll}
+				1 & \text{si } 1\leq n \leq 3,\\\underbrace{t(\left\lfloor\frac{n}{2}\right\rfloor)}_{\left\lfloor\frac{n}{2}\right\rfloor -tally}+
+				\underbrace{t(\left\lceil\frac{n}{2}\right\rceil)}_{\left\lceil\frac{n}{2}\right\rceil -tally}+  \underbrace{1 + \left\lfloor \log \left\lceil \frac{n}{2} \right\rceil \right\rfloor}_{(i,j)-adder} & \text{si } n> 3
+				\end{array} \right.
+				\end{equation}}
+			\item{Let's put $ s_i = t (2 ^ i) $, then we have
+				\begin{equation*}
+				s_i=\left\{
+				\begin{array}{ll}
+				1 & \text{si } 0\leq i \leq 1,\\
+				2s_{i-1} + i & \text{si } i>1
+				\end{array} \right.
+				\end{equation*}
+				The characteristic polynomial of the recurrence $ s $ is $ p (x) = (x-2) (x-1) ^ 2 $ and so $ s_i = c_12 ^ i + c_2 + c_3 i $. Solving the system (for $ i = 0, 1, $ 2)
+				\begin{equation*}
+				\begin{array}{llllllll}
+				s_0 =& c_1 & + & c_2 & + & & = & 1\\
+				s_1 =& 2c_1 & + & c_2 & + & c_3 & = & 1\\
+				s_2 =& 4c_1 & + & c_2 & + & 2c_3 & = & 4
+				\end{array}
+				\end{equation*}
+				we get $ c_1 = 3, c_2 = -2 $ and $ c_3 = -3 $. So $ s_i = 3 \cdot 2 ^ i - 3i -2 $ and so $ t (n) = s _ {\log n} = 3n - 3 \log n -2 $ when $ n $ is a power of 2.
+
+				So we have $ t (n) \in \Theta (n: n \text {is a power of} 2) $. Since $ t (n) $ is possibly nondecreasing (we can prove it), we conclude by the rule of harmony that $ t (n) \in \Theta (n) $.
+
+				Alternatively, if one simply seeks to obtain the order of $ t $ and not its exact form, one can use the theorem seen in class (first case). We have $ a = 2, b = 2, $ and $ f (n) = \log (n) \in O (n ^ {\log 2 - \epsilon}) $ taking any $ \epsilon $ small enough (eg 0.1). We also conclude that $ t (n) \in \Theta (n: n \text {is a power of} 2) $.
+			}
+		\end{enumerate}
+	\end{solution}
+
+
+
+	\section{}
+	\begin{question}
+		Soient $a, b \in \mathbb{N}$ et $d=pgcd(a,b)$.
+		\begin{enumerate}
+			\item Show that there are $ s, t \in \mathbb {Z} $ such that $ sa + tb = d $.
+			\item Give an efficient algorithm to compute $ s, t $ and $ d $ from $ a $ and $ b $. The algorithm should not calculate $ d $ before calculating $ s $ and $ t $.
+			\item Let $ a, b \in \mathbb {N} $ such that $ b> 1 $ and $ pgcd (a, b) = 1 $. Give an efficient alqorith that calculates $ s \in \mathbb {Z} $ such that $ sa $ mod $ b = 1 $.
+		\end{enumerate}
+	\end{question}
+	\begin{solution}
+
+		\begin{enumerate}
+			\item {It is assumed that the property of Euclid
+				$$ pgcd (a, b) = pgcd (b, a \mod b) $$
+				is true for the moment (proof below).
+
+				Suppose without loss of generality that $ a \geq b $ and show the induction proposition on $ b $. \underline {Base case: $ b = 0 $:} We have $ 1 \cdot a + 0 \cdot b = a = pgcd (a, b) $ \underline {Induction step: $ b> 0 $:}
+
+				The induction hypothesis is: If we have two numbers $ a ', b' $ such that (SPDG) $ a '\geq b' $ and that $ b '<b $, then there exists $ s' , t '\in \mathbb {Z} $ such that $ is' + t'b' = pgcd (a ', b') $.
+
+				We want to show that for $ a \geq b $, there exists $ s, t \in \mathbb {Z} $ such that $$ sa + tb = pgcd (a, b). $$
+
+				By induction hypothesis, note that, for the numbers $ b $ and $ (a \mod b) $, there exist $ s ', t' \in \mathbb {Z} $ such that $$ s'b + t '(a \mod 	b) = pgcd (b, a \mod b), $$
+				because $ (a \mod b) <b $. Now put $ s = t '$ and $ t = s' - (a // b) t' $.
+
+				Nous obtenons:
+				\begin{align*}
+				sa+tb&=t'a + (s'-(a // b)t')b &&\text{par définition de $s$ et $t$}\\
+				&=s'b + t' (a-(a // b)b)&&\text{réarrangement des termes}\\
+				&=s'b + t'(a\mod b)&&\text{$a-(a // b)b$ est le reste de la division de $a$ par $b$}\\
+				&= pgcd(b, a\mod b) &&\text{par hypothèse d'induction}\\
+				&= pgcd(a, b) &&\text{par propriété d'Euclide}\\
+				&=d &&\text{par définition de $a$ et $b$}.
+				\end{align*}}
+
+
+			Thus, we have indeed shown that, for any pair of positive integers $ a $ and $ b $, there exist integers $ s, t $ such that $$ sa + tb = d = pgcd (a, b) . $$ $ \hfill \blacksquare $
+
+			Now prove that the \textbf {property of Euclid} is true:
+			$$ pgcd (a, b) = pgcd (b, a \mod b). $$
+
+			Soit $d = pgcd(a,b)$ et $d'=pgcd(b, a\mod b)$. Par contradiction, supposons que $d\neq d'$. Il y a 2 choix:
+			\begin{enumerate}
+				\item $d<d'$. Puisque $d' = pgcd(b, a\mod b)$
+				\begin{align*}
+					&\Rightarrow d'|b \text{ et } d'|(a\mod b) &&\text{par définition du pgcd}\\
+					&\Rightarrow d'|a &&\text{car $a = kb + (a\text{ mod } b)$ pour un certain $k\in \mathbb{Z}$}\\
+					& &&\text{et $d'$ doit diviser les 2 côtés de l'équation}\\
+					&\Rightarrow d'|a \text{ et } d'|b
+				\end{align*}
+				We therefore have that $ $ is a common divisor of $ a $ and $ b $, strictly greater than the greatest common divisor of $ a $ and $ b $, that is $ d $. Contradiction.
+
+				\item $d>d'$.  Puisque $d = pgcd(a,b)$
+				\begin{align*}
+				&\Rightarrow d|a \text{ et } d|b  &&\text{par définition du pgcd}\\
+				&\Rightarrow d|(a\text{ mod }b) &&\text{car $a -kb= (a\text{ mod } b)$ pour un certain $k\in \mathbb{Z}$}\\
+				& &&\text{et $d$ doit diviser les 2 côtés de l'équation}\\
+				&\Rightarrow d|b \text{ et } d|(a\text{ mod }b)
+				\end{align*}
+				We therefore have that $ d $ is a common divisor of $ b $ and $ (a \text {mod} b) $, strictly greater than the greatest common divisor of $ b $ and $ (a \text {mod} b) $, which is $ $. Contradiction.
+			\end{enumerate}
+			In both cases, we come to a contradiction. As a result, we have $ d = d '$ and $$ pgcd (a, b) = pgcd (b, a \mod b) $$ $ \hfill \blacksquare $
+
+
+			\item{We directly obtain a recursive algorithm from the previous proof:
+				\begin{lstlisting}
+				def pgcd_etendu(a, b):
+					if b == 0:
+						return (1, 0, a)	#Cas de base de l'induction
+					else:						#Etape d'induction avec b et (a modb)
+						(s1, t1, d) = pgcd_etendu(b, a % b)
+						s = t1
+						t = s1 - (a//b)*t1
+					return (s, t, d)
+				\end{lstlisting}}
+			\item{Just calculate $ s, t \in \mathbb {Z} $ such that $ sa + tb = pgcd (a, b) $ thanks to the previous algorithm. We are getting
+				\begin{align*}
+				sa \mod b &= (sa + tb) \mod b & \text{car }tb \mod b = 0\\
+				&= pgcd(a,b) \mod b & \text{par déf. de }s, t\\
+				&= 1 \mod b & \text{par hypothèse}\\
+				&= 1 & \text{car }b>1.
+				\end{align*}}
+		\end{enumerate}
+	\end{solution}
+
+
+
+\end{document}

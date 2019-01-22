@@ -1,0 +1,163 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{1em}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+	language=Python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\newenvironment{question}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Question #1:}
+	\noindent}
+{\medskip}
+
+\newenvironment{solution}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Solution #1:}
+	\noindent}
+{\medskip}
+
+\begin{document}
+		
+	\leftline{\bfseries Introduction à l'algorithmique \hfill Hiver 2018}
+	
+	\noindent \hrulefill
+	\leftline{IFT2125-6001 \hfill TA: Stéphanie Larocque}
+	\centerline{\bfseries Démonstration 6}
+	\centerline{À partir des corrigés de Maelle Zimmermann}	
+	\noindent \hrulefill
+	
+	\vspace{1cm}
+	
+	\section{}
+	\begin{question}
+		Exécuter l'algorithme de Prim sur le graphe suivant:
+		\begin{center}
+			\includegraphics[]{Prim.png}
+		\end{center}
+	\end{question}
+	\begin{solution}
+		En exécutant l'algorithme, nous obtenons:
+		\begin{center}
+			\begin{tabular}{c|c|c}
+				Itération & $(u,v)$ & $B$ \\
+				\hline
+				0 & - & $\{1\}$\\
+				1 & $(1,2)$ & $\{1,2\}$\\
+				2 & $(2,3)$ & $\{1,2,3\}$ \\
+				3 & $(1,4)$ & $\{1,2,3,4\}$ \\
+				4 & $(4,5)$ & $\{1,2,3,4,5\}$ \\
+				5 & $(4,7)$ & $\{1,2,3,4,5,7\}$ \\
+				6 & $(7,6)$ & $\{1,2,3,4,5,7,6\}$
+			\end{tabular}
+		\end{center}
+		Ainsi l'arbre sous-tendant de poids minimal est de poids 17.
+	\end{solution}
+	
+	\section{}
+	\begin{question}
+		Montrer que l'algorithme de Prim peut, comme celui de Kruskal, être implémenté en utilisant des monceaux. Montrer qu'il prend alors un temps dans $\Theta(a \log n)$.
+	\end{question}
+	
+	\begin{solution}
+		Considérons d'abord l'algorithme de Prim implémenté naïvement sans monceaux:
+		\begin{lstlisting}
+		def Prim(V, E):
+			def poids((u, v, c)): return c
+			F = sorted(E, key = poids)
+			T = []
+			B = set(V[:1])
+		
+			# tant que tous les sommets ne sont pas couverts
+			while len(B) != len(V)
+				for (u, v, _) in F:
+					if (u in B) != (v in B):
+						break
+				T.append((u, v))
+				B.update([u, v])
+			return T
+		\end{lstlisting}
+		Dans le pire cas, cet algorithme prend un temps dans $O(an)$ (boucle while exécutée exactement $n-1$ fois et parcours de $F$ en entier qui contient $a$ arêtes). Mais il existe une meilleure implémentation.
+		Voici l'algorithme de Prim implémenté avec des monceaux:
+		\begin{lstlisting}
+		def Prim_heap(V, E):
+			if len(V) == 0:
+				return []
+			x = V[0] # sommet actuel
+			T = [] # arbre partiel minimum
+			B = set(V[:1]) # sommets couverts par T
+			H = [] # monceau vide
+		
+			# construire voisins des sommets
+			voisins = [[] for v in V]
+			for (u, v, c) in E:
+				voisins[u].append((v, c))
+				voisins[v].append((u, c))
+		
+			# calcul de l'arbre
+			while len(T) < len(V) - 1:
+			# met tous les voisins de x dans le monceau
+				for (y, c) in voisins[x]:
+					heappush(H, (c, (x, y)))
+		
+				# retire l'arete au poids c minimum
+				(c, (u, v)) = heappop(H)
+		
+				# continue de retirer jusqu'a ce que l'arete traverse B et V\B
+				while (u in B) == (v in B):
+					(c, (u, v)) = heappop(H)
+				
+				# update x, T et B
+				x = u if u not in B else v
+				T.append((u, v))
+				B.add(x)
+			return T
+		\end{lstlisting}
+		Dans un monceau, les opérations push et pop prennent un temps dans $\Theta(\log k)$ et $\Theta(\log k)$ respectivement (où $k$ est le nombre d'éléments dans le monceau). 
+		Posons $n=|V|$ et $a=|E|$, alors:
+		\begin{itemize}
+			\item {La boucle qui construit les voisins est exécutée $a$ fois donc prend un temps dans $\Theta(a)$.}
+			\item {Chaque arête $(u,v)$ est ajoutée au plus 2 fois dans le monceau, soit via $u$ soit via $v$. Il y a donc au plus $2a$ opérations push qui nécessitent chacune un temps de $\Theta(\log a)$. Donc le temps total des ajouts est dans $\Theta(a \log a)$.}
+			\item{Similairement, il y a au plus $2a$ opérations pop qui nécessitent chacune un temps de $\Theta(\log a)$. Donc le temps total des retraits est dans $\Theta(a \log a)$.} 
+			\item{Les opérations append et add sont exécutées autant de fois qu'il y a d'itérations de l'algorithme, donc au plus $n-1$ fois.}
+		\end{itemize}
+		Le temps d'exécution de l'algorithme est donc dans $\Theta(a \log a)$, ce qui s'écrit aussi $\Theta(a \log n)$ pour les mêmes raisons que lors de l'analyse de l'algorithme de Kruskal.
+	\end{solution}
+\end{document}

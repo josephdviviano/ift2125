@@ -1,0 +1,309 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{1em}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+	language=Python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\newenvironment{question}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Question #1:}
+	\noindent}
+{\medskip}
+
+\newenvironment{solution}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Solution #1:}
+	\noindent}
+{\medskip}
+
+\begin{document}
+	\leftline{\bfseries Introduction à l'algorithmique \hfill Hiver 2018}
+
+	\noindent \hrulefill
+	\leftline{IFT2125-6001 \hfill TA: Stéphanie Larocque}
+	\centerline{\bfseries Démonstration 9}
+	\centerline{À partir des corrigés de Maelle Zimmermann}	
+	\noindent \hrulefill
+	
+	\vspace{1cm}
+	
+		
+	\section{}
+	\begin{question}
+        Topological sorting of the vertices of the next oriented and acyclic graph.		%\begin{center}
+			%\includegraphics[scale=0.5]{Graphe_acyclique.png}
+		%\end{center}
+	\end{question}
+	\begin{solution}
+		\textcolor{red}{See jupyter notebook / python file for code}
+		
+		
+		All you need to do is go through the graph in depth and number each
+		top at the very end of its exploration, then reverse the order obtained.
+
+		The order \verb|postnum| obtained after the depth course is: 24, 8, 12, 4, 6, 2, 3, 1.
+	\end{solution}
+	
+	\newpage
+	\section{}
+\begin{question}
+		Calculate the expected number of rolls of two dice before getting a pair of 1. Ditto get two numbers that are 7.
+	\end{question}
+	\begin{solution}
+		This problem amounts to calculating the expectation of a geometrical law with parameter $ p $. Indeed the geometric law considers the problem of repeating a proof whose probability of success is $ p $, and the geometric random variable denotes the rank of the first success.
+
+		Let $p$ be the probability of obtaining the desired event during a throw. The expected number of $n$ throws is given by:
+		\begin{align*}
+		n &= 1\cdot p + 2(1-p)p + 3 (1-p)^2 p + ...\\
+		&=\sum_{k=1}^{\infty}k(1-p)^{k-1}p.
+		\end{align*}
+
+		Or we have for $x\in [0,1)$:
+		\begin{align*}
+		f(x)&=\sum_{k=0}^{\infty}x^k= \frac{1}{1-x} \qquad \text{(série géométrique)}\\
+		f'(x)&=\sum_{k=1}^{\infty}kx^{k-1}= \frac{1}{(1-x)^2}.
+		\end{align*}
+		Comme $n=p\sum_{k=1}^{\infty}k(1-p)^{k-1}$, nous obtenons
+		\begin{align*}
+		n=\frac{p}{(1-(1-p))^2}=\frac{1}{p}.
+		\end{align*}
+		
+		Since the probability of getting a pair of 1 is given by $ p = 1/36 $, the expected number of throws is 36. Similarly, the probability of getting a pair of numbers that is 7 is 1/6, so the expected number of throws is 6.
+	\end{solution}
+	
+	\newpage
+	\section{} 
+	\begin{question}
+		Give a Monte Carlo algorithm to determine if two polynomials $ p $ and $ q $ on $ \mathbb{Z} $, presented by arithmetic circuits, are equal. We can use without proof the fact that the degree of a polynomial is limited by the height of the circuit.
+	\end{question}
+	\begin{solution}
+		Consider the following example (image missing, see notes from class):
+		
+		The circuits $C_p$ et $C_q$ respectively calculate the following polynomials:
+		\begin{align*}
+		p(x_1,x_2,x_3) &= ((6+(x_1x_2))-(x_1x_2)(7-x_3))+3(x_1x_2)(7-x_3)\\
+		q(x_1,x_2,x_3) &= (6+(x_1x_3)) - 3(x_2-x_3)(7x_2-2)
+		\end{align*}
+
+		To determine if $ p = q $, we ask $ r = p-q $ and we test if $ r $ is zero. In other words, we test whether the circuit $ C_r = C_p-C_q $ calculates the polynomial 0. To do this, we choose a random assignment of $ x_1, x_2, ..., x_m $, that is to say a set of numbers $ a_1, a_2, ..., a_m \in \mathbb{Z} $ and we evaluate $ r (a_1, a_2, ..., a_m) $. If $ r (a_1, a_2, ..., a_m) \neq 0 $, then it is impossible for $ r $ to be the polynomial 0. On the other hand if $ r (a_1, a_2, ..., a_m) = 0 $, it is still possible that $ r $ is not polynomial 0, if we chose a root of $ r $.
+
+		In the case where $ m = 1 $, that is to say that the polynomial is univariate, it is enough to choose $ a_1 $ in a set of size $ k \cdot \deg (r) $ to have a probability of error at most $ 1 / k. Indeed, $ r $ has at most $ \deg (r) $ roots.
+
+		In these examples, btw, \deg(r) is simply the degree of the polynomial.
+
+		In the multivariate case, the number of roots of $ r $ is no longer limited by $ \deg (r) $. In fact, $ r $ can have an infinity of roots. Indeed, the polynomial $ p (x_1, x_2, x_3) = x_1 $ has an infinity of roots of the form $ (0, x_2, x_3) $. We will see from a lemma that the strategy of the univariate case is still generalized to multivariate polynomials.
+
+		Let $ h_p $ and $ h_q $ be the height of $ C_p $ and $ C_q $ respectively. We give the following algorithm:
+		\begin{enumerate}
+			\item Poser $S=\{1,2,...,4\cdot \max(2^{h_p},2^{h_q})\}$
+			\item Choisir aléatoirement et indépendamment $a_1,a_2,...,a_m \in \text{uniforme}(S)$
+			\item Poser $r=p-q$
+			\item Si $r(a_1, a_2, ..., a_m)=0$ alors retourner oui, sinon retourner non.
+		\end{enumerate}
+		
+		When the algorithm responds no, we are sure that $ p $ and $ q $ are not equal. When the algorithm responds yes, it is possible that $ p $ and $ q $ are not equal and that the algorithm is wrong. To evaluate the probability that the algorithm is wrong in the multivariate case, we need the following lemma:
+		
+		\textbf{Lemme de Schwartz-Zippel:} let $ p \in \mathbb{Q} [x_1, x_2, ..., x_m] $ a nonzero polynomial. Let $ S \subset \mathbb{Q} $ be a finite subset and $ a_1, a_2, ..., a_m $ chosen in $ S $ uniformly and independently. So,
+		\begin{equation}
+		\label{lemme}
+		\text{Pr}[p(a_1,a_2,...,a_m)=0]\leq \frac{\deg(p)}{|S|}.
+		\end{equation}
+		
+		\textbf{Evidence:} The lemma is demonstrated by induction on the number of variables.
+		
+		\underline{Base Case (m=1):} in this case, $ p $ is univariate and has at most $ \deg (p) $ roots, so we get $$ \text {Pr} [p (a_1) = 0] \leq \frac{\deg (p )}{|S|} $$.
+		
+		\underline{Induction Step:} we can put each power of $ x_1 $ highlighted in $ p $ and get the next rewrite.
+        $$ p (x_1, x_2, ... x_m) = \sum_{i=0}^d x_1^ip_i (x_2, ... x_m) $$
+
+		Since $ p $ is non-zero, there is at least one $ i $ such that $ p_i $ is non-zero. Let $ i $ be the largest such index, then by induction hypothesis:		
+		
+		\begin{equation}
+		\text{Pr}[p_i(a_2,...a_m)=0] \leq \frac{\deg(p_i)}{|S|} \leq \frac{\deg(p) - i}{|S|}
+		\end{equation}
+		
+		If $ p_i (a_2, ... a_m) \neq 0 $, then $ p (x_1, a_2, ..., a_m) $ is a one-variable polynomial ($ x_1 $) of degree $ i $, because $ i $ is the largest degree of $ x_1 $ non-zero in $ p $. Thus by induction hypothesis:
+		
+		\begin{equation}
+		\text{Pr}[p(a_1,a_2,...,a_m) = 0 \| \p_i(a_2,...a_m)\neq 0] \leq \frac{i}{S}
+		\end{equation}
+		
+		If we call $ A $ the event $ p (a_1, a_2, ..., a_m) = 0 $ and $ B $ the event $ p_i (a_2, ... a_m) = 0 $, then we have
+		
+		\begin{align*}
+		\Pr[A] &= \Pr[A|B]\Pr[B] + \Pr[A|B^c]\Pr[B^c]\\
+		&\leq \Pr[B] + \Pr[A|B^c]\\
+		&\leq \frac{\deg(p)-i}{|S|}+\frac{i}{|S|} \quad \text{par (2) et (3)}\\
+		&=\frac{\deg(p)}{|S|}.
+		\end{align*}
+		
+		Which concludes the proof. $ \Square $
+
+		Now consider the case where the algorithm above answers yes. Let $ w $ be the probability that the algorithm is wrong, in other words that $ r (a_1, a_2, ... a_m) = 0 $ knowing that $ r $ is non-zero. We have:
+
+		\begin{align*}
+		w &\leq \frac{\deg(r)}{|S|} \quad &\text{par (\ref{lemme})}\\
+		&\leq \frac{\max(\deg(p),\deg(q))}{|S|} \quad & \text{car }\deg(r)\leq \max(\deg(p),\deg(q))\\
+		&= \frac{\max(\deg(p),\deg(q))}{4\cdot \max(2^{h_p},2^{h_q})} \quad & \text{par déf. de }S\\
+		&\leq \frac{\max(\deg(p),\deg(q))}{4\cdot \max(\deg(p),\deg(q))}\quad & \text{car }\deg(p)\leq 2^{h_p} \text{ et } \deg(q) \leq 2^{h_q}\\
+		&=\frac{1}{4}
+		\end{align*}
+
+		Thus the algorithm errs with probability at most $ \frac {1} {4} $ when it answers yes.
+
+		\textbf {Execution time analysis:} We analyze the execution time of the algorithm according to the size of the input, ie according to the degree of $ p $ and $ q $ and according to the number of variables $ m $. If you can draw a coin in $ O (1) $, you can select a number $ a_i $ in $ S $ per time binary search $ \log_2 | S | = \log_2 (4 \cdot \max (2 ^ {h_p}, 2 ^ {h_q})) = 2+ \max (h_p, h_q) $ coin toss. The execution time of the random selection algorithm is therefore in $ O (m \cdot \max (h_p, h_q)) $. Evaluating the circuit $ r $ is done in polynomial time. The
+
+		Execution time of the algorithm is therefore polynomial in the size of the input.
+	\end{solution}
+	
+	\section{}
+	\begin{question}
+		Give an algorithm that calculates the $ d $ edit distance, also called Levenshtein distance, between two words. More precisely, let u and v be two words, then $ d (u, v) $ is the minimum number of letters that must be removed, inserted or substituted to go from $ u $ to $ V $.
+
+		For example, we can go from $ table $ to $ stage $ in 3 operations:
+		\begin{align*}
+		table &\rightarrow tale & \text{(remove $b$)}\\
+		&\rightarrow stale & \text{(insert $s$)}\\
+		&\rightarrow stage & \text{(substuitute $l$ pour $g$)}
+		\end{align*}
+	\end{question}
+	\begin{solution}
+		We construct a $ D $ array of size $ | u | + 1 \times | v | + 1 $ such that $ D [i] [j] $ is the distance between the subwords $ u [1 ... i] $ and $ v [1 ... j] $.
+
+		Note first that $ D [i] [0] = i $ for all $ 0 \leq i \leq | u | $, and $ D [0] [j] = j $ for all $ 0 \leq j \leq | v | $. Indeed, for an empty word $ \epsilon $, we have $ d (x, \epsilon) = d (\epsilon, x) = | x | $ because the minimal edition consists in the first case to erase all the letters $ x $ ($ | x | $ deletions) and in the second case to add all the letters of $ x $ to the empty word ($ | x | $ insertions). More generally, to pass from a word $ u [1 ... i] $ to a word $ v [1 ... j] $, there are three possibilities:
+
+		\begin{itemize}
+			\item remove $u[i]$ then go from $u[1...i-1]$ at $v[1...j]$
+			\item Skip from $u[1...i]$ at $v[1...j-1]$ then insert $v[j]$
+			\item Skip from $u[1...i-1]$ at $v[1...j-1]$ the insert $u[i]$ for $v[j]$ (if these letters are different)
+		\end{itemize}
+
+		This gives the rule:
+		$$D[i][j] = \min (\underbrace{D[i-1][j] + 1}_{\text{suppression}}, \underbrace{D[i][j-1]+1}_{\text{insertion}}, \underbrace{D[i-1][j-1] +b_{i,j}}_{\text{substitution}})$$
+		or $b_{i,j}= 0$ si $u[i] = v[j]$, and 1 if not.
+		
+		\newpage
+		Here is an implementation which takes time in $\Theta(|u||v|)$:
+		\begin{lstlisting}
+		def d_tab(u, v):
+			D = [[0]*(len(v) + 1) for _ in range(len(u) + 1)]
+			
+			for i in range(len(u)+1):
+				D[i][0] = i
+			
+			for j in range(len(v)+1):
+				D[0][j] = j
+			
+			for i in range(1, len(u) + 1):
+				for j in range(1, len(v) + 1):
+					b = 1 if u[i] != v[j] else 0
+					D[i][j] = min(D[i-1][j] + 1, D[i][j-1] + 1, D[i-1][j-1] + b)
+			return D
+			
+		def d(u, v):
+			return d_tab(u, v)[-1][-1]
+
+		\end{lstlisting}
+	\end{solution}
+	\section{}
+	\begin{question}
+		Let $u=AGGAGGA$ and $v=AAGCTAAG$. Identify all alignments between $ u $ and $ v $ of cost $ d (u, v) $, that is, all optimal alignments.
+	\end{question}
+	\begin{solution}
+		Le tableau des distances est:
+		
+		\begin{center}
+			\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+				\hline
+				& $\epsilon$ & A & A & G & C & T & A & A & G \\
+				\hline
+				$\epsilon$ &0&1&2&3&4&5&6&7&8\\
+				\hline
+				A&1&0&1&2&3&4&5&6&7\\
+				\hline
+				G&2&1&1&1&2&3&4&5&6\\
+				\hline
+				G&3&2&3&1&2&3&4&5&5\\
+				\hline
+				A&4&3&2&2&2&3&3&4&5\\
+				\hline
+				G&5&4&3&2&3&3&4&4&4\\
+				\hline
+				G&6&5&4&3&3&4&4&5&4\\
+				\hline
+				A&7&6&5&4&4&4&4&4&5\\
+				\hline
+			\end{tabular}
+		\end{center}
+		
+		So the distance of Levenshtein between the two words is 5. to find which alignment and therefore which sequence of operations gives this cost, it is necessary to go up the table since the box \verb | T [-1] [- 1] | following the rules of the algorithm.
+		\begin{center}
+			\includegraphics[scale=0.85]{Tableau.PNG}
+		\end{center}
+		Le chemin du haut correspond à l'alignement de séquence suivant:
+		\begin{center}
+			\begin{tabular}{ccccccccc}
+				A&A&G&C&T&A&A&G&-\\
+				-&A&G&-&G&A&G&G&A
+			\end{tabular}
+		\end{center}
+		which corresponds to making two insertions (A and C), two substitutions (G for T and G for A) and a deletion (A). In all we get 6 paths, and the 5 others correspond to the following sequence alignments:
+		\begin{center}
+			\begin{tabular}{ccccccccc}
+				A&A&G&C&T&A&A&G&\\
+				A&G&G&A&G&G&A&-&\\
+				\\
+				A&A&G&C&T&A&A&G&-\\
+				A&G&G&-&-&A&G&G&A\\
+				\\
+				A&A&G&C&T&A&A&G&-\\
+				A&-&G&-&G&A&G&G&A\\
+				\\
+				A&A&G&C&T&A&A&G&-\\
+				-&A&G&G&-&A&G&G&A\\
+				\\
+				A&A&G&C&T&A&A&G&-\\
+				A&-&G&G&-&A&G&G&A\\
+			\end{tabular}
+		\end{center}
+	\end{solution}
+
+\end{document}

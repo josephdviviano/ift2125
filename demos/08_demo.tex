@@ -1,0 +1,203 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{1em}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+	language=Python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\newenvironment{question}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Question #1:}
+	\noindent}
+{\medskip}
+
+\newenvironment{solution}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Solution #1:}
+	\noindent}
+{\medskip}
+
+\begin{document}
+	\leftline{\bfseries Introduction à l'algorithmique \hfill Hiver 2018}
+
+	\noindent \hrulefill
+	\leftline{IFT2125-6001 \hfill TA: Stéphanie Larocque}
+	\centerline{\bfseries Démonstration 8}
+	\centerline{À partir des corrigés de Maelle Zimmermann}	
+	\noindent \hrulefill
+	
+	\vspace{1cm}
+	
+	\section{}
+	\begin{question}
+		Give an algorithm to make change with as few coins as possible, assuming that each type of coin exists in unlimited quantities.
+	\end{question}
+	
+	\begin{solution}
+		Let $ c_1, c_2, ..., c_n> 0 $ the value of the parts available in unlimited quantities. Suppose we want to make change on $ M $ units. We build a $ T $ array of $ n \times (M + 1) $ size such that $ T [i, j] $ is the minimum number of coins to make change over $ j $ units using only the $ i $ first coins.
+
+		Let us first note that $ T [i, 0] = 0 $ for all $ 1 \leq i \leq n $ since there is no coin to return. Furthermore,
+		\Begin {equation *}
+			T [i, j] = \min (\underbrace {T [i-1, j]} _ {\text {do not take part} c_i}, \underbrace {T [i, j-c_i] +1} _ {\text {take piece} c_i})
+		\End {equation *}
+
+		assuming each box outside the table is implicitly $ + \infty $. Indeed, if we do not use the $ i $ th coin, the number of coins returned will be identical to the number of coins needed to make the same amount $ j $ using only the $ i-1 $ first coins. If we use the $ i $ th coin, we will use one more coin than the number of coins needed to make the remaining amount, worth $ j-c_i $. We will choose whether or not to use the $ i $ th coin according to which of these two options requires the least coins.
+
+		The minimum number of coins needed to make change over $ M $ units will therefore be $ T [n, M] $. It takes another step to identify the parts to render. To do this, simply start at the box $ T [n, M] $ of the table and find the path that has been taken since $ T [0,0] $. If $ T [i, j] $ comes from $ T [i-1, j] $, then the piece $ i $ is never used. If $ T [i, j] $ comes from $ T [i, j-c_i] $ then the $ i $ coin has been used. This process is repeated iteratively until it reaches $ T [0,0] $.
+
+		Here is an implementation of this algorithm:
+		
+		\newpage
+		\begin{lstlisting}
+		def nb_pieces(c, M):
+			# c = [c1,c2,...,cn] la liste des denominations disponibles
+			# M, le montant a retourner
+			# retourne le tableau T rempli
+			T = [[0]*(M+1) for i in range(len(c))]
+			
+			for i in range(len(c)):
+				for j in range(1,M+1):
+					a = T[i-1][j] if i > 0 else float("inf")
+					b = T[i][j-c[i]] if j >= c[i] else float("inf")
+					T[i][j] = min(a, b+1)
+			
+			return T
+		
+		def monnaie(c, M):
+			# retourne les pieces de monnaie a rendre
+			p = [0] * len(c) #nombre de pieces de chaque denomination a rendre
+			T = nb_pieces(c, M)
+			i, j = len(c)-1, M
+			
+			while (i, j) != (0, 0):
+				a = T[i-1][j] if i > 0 else float("inf")
+				b = T[i][j-c[i]] if j >= c[i] else float("inf")
+				
+				if T[i][j] == a:
+					i -= 1
+				else:
+					j -= c[i]
+					p[i] += 1
+			
+			return p
+		\end{lstlisting}
+		The exact execution time of \verb | currency | is in $ \Theta (nM) $.
+	\end{solution}
+	\newpage
+	\section{}
+	\begin{question}
+		Give an algorithm that makes money even when the number of coins available is limited.
+	\end{question}
+	
+	\begin{solution}
+		Just create a line for each instance of a part and then use the rule:
+		\Begin {equation *}
+			T [i, j] = \min (\underbrace {T [i-1, j]} _ {\text {do not take part} c_i}, \underbrace {T [i - 1, j-p_i] +1 } _ {\text {take piece} c_i})
+		\End {equation *}
+		
+		where $ p_i $ is the coin associated with the line $ i $. All cells are initialized to $ + \infty $ except for the first column that is initialized to 0. Here is a possible implementation:
+
+		\begin{lstlisting}
+		def nb_pieces(c, s, k):
+			T = [[float("inf")] * (k+1) for i in range(sum(s)+1)]
+			P = [0] + [p for i in range(len(c)) for p in [c[i]] * s[i]]
+			
+			for i in range(len(T)):
+				T[i][0] = 0
+			
+			for i in range(1, len(T)):
+				for j in range(1, k+1):
+					a = T[i-1][j] if i > 0 else float("inf")
+					b = T[i-1][j-c[P[i]]] if j >= c[P[i]] else float("inf")
+					T[i][j] = min(a, b+1)
+			
+			return T
+		
+		def monnaie(c, s, k):
+			T = nb_pieces(c, s, k)
+			P = [None] + [x for i in range(len(c)) for x in [i] * s[i]]
+			p = [0] * len(c)
+			j = k
+			
+			for i in reversed(range(1, len(T))):
+				a = T[i-1][j]
+				b = T[i-1][j-c[P[i]]] if j >= c[P[i]] else float("inf")
+				if T[i][j] != a:
+					p[P[i]] += 1
+					j -= c[P[i]]
+			return p
+		\end{lstlisting}
+	\end{solution}
+
+
+	\section{}
+	\begin{question}
+		RSA between Alice and Bob
+	\end{question}
+	\begin{solution}
+		
+		Bob :
+		\begin{enumerate}
+			\item Select 2 "big" first $ p = 19, q = $ 23
+			\item Calculate their product $ z = pq = $ 437
+			\item Also calculate $ \phi = (p-1) (q-1) = $ 396
+			\item Randomly choose a number $ 1 \leq n \leq z-1 $: $ n = 13 $
+			\item Calculates the unique $ s $ such that $ ns (\mod \phi) = 1 $: $ s = 61 $ (if does not exist or that gcd ($ n, z) \neq1 $, then choose a other $ n $ as pgcd ($ n, z) \neq1 $)
+			\item Bob sends publicly $ z = $ 437 and $ n = $ 13
+		\end{enumerate}	
+	
+		Alice :
+		\begin{enumerate}
+			\item Wants to encode the following message $ 0 \leq m \leq z-1 $: $ m = 123 $
+			\item Encode with $ c = m ^ n (\mod z) $ thus: $ c = 386 $
+			\item Sends the coded message $ c = $ 386			
+		\end{enumerate}
+	
+		Bob
+		\begin{enumerate}
+			\item Get the coded message $ c = $ 386
+			\item Decode the message $ m = c ^ s (\mod z) $ thus: $ m = 123 $
+		\end{enumerate}
+	
+		So they managed to exchange a message without a spy discovering it, because finding $ s $ would require the factoring of $ z $.
+	\end{solution}
+
+	
+\end{document}

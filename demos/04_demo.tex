@@ -1,0 +1,448 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{1em}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+	language=Python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\newenvironment{question}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Question #1:}
+	\noindent}
+{\medskip}
+
+\newenvironment{solution}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Solution #1:}
+	\noindent}
+{\medskip}
+
+\begin{document}
+		
+	\leftline{\bfseries Introduction à l'algorithmique \hfill Hiver 2018}
+	
+	\noindent \hrulefill
+	\leftline{IFT2125-6001 \hfill TA: Stéphanie Larocque}
+	\centerline{\bfseries Démonstration 4}
+	\centerline{À partir des corrigés de Maelle Zimmermann}	
+	\noindent \hrulefill
+	
+	\vspace{1cm}
+	
+	\section{}
+	\begin{question}
+		Soit $f \in O(n^{\log_ba-\epsilon})$ où $\epsilon > 0$. Soit $T: \mathbb{N} \rightarrow \mathbb{R}^{\geq 0}$ telle que
+		\begin{equation*}
+			T(b^k)=\left\{
+			\begin{array}{ll}
+				c & \text{si } k= k_0,\\
+				aT(b^{k-1})+f(b^k) & \text{sinon }
+			\end{array} \right.
+		\end{equation*}
+		Montrer que $T \in \Theta(n^{\log_b a} : n\text{ est une puissance de }b)$.
+	\end{question}
+
+\textcolor{red}{Note : Il s'agit de la première partie du théorème des puissances de $b$}	
+	\begin{solution}
+		Posons $g(b^{k_0})=c/a^{k_0}$, et $g(b^k)=f(b^k)/a^k$ pour tout $k>k_0$. Nous avons montré en cours par induction que $T(b^k)=a^k\left[g(b^{k_0})+g(b^{k_0+1})+...+g(b^{k})\right]$, ce qui prouve que $T \in \Omega(n^{\log_ba}: n\text{ est une puissance de }b)$, car $a^k=(b^k)^{\log_ba}$. En effet, pour $k$ assez grand ($k\geq k_0$), on a:
+		
+		\begin{align*}
+		T(b^k) 
+			&= a^k\left[g(b^{k_0})+g(b^{k_0+1})+...+g(b^{k})\right]\\
+			&= a^k \left[\frac{c}{a^{k_0}} + \frac{f(b^{k_0+1})}{a^{k_0+1}} + \dots + \frac{f(b^{k})}{a^{k}}  \right] &&\text{par définition de $g$}\\
+			&\geq a^k \left[\frac{c}{a^{k_0}} + 0 + \dots + 0 \right] &&\text{car $f(b^i)\geq 0$ et $a^i\geq 0$ et donc $\frac{f(b^{i})}{a^{i}}\geq 0$ pour $i> k_0$ } \\
+			&= \left(\frac{c}{a^{k_0}}\right)a^k &&\text{où $\left(\frac{c}{a^{k_0}}\right)$ est une constante}
+		\end{align*}
+		
+		Et donc on a bien $T(b^k)\in \Omega(a^k)$, c'est-à-dire que $T(n) \in \Omega(n^{\log_ba}: n\text{ est une puissance de }b)$.
+		
+		Il reste à prouver que $T \in O(n^{\log_ba}: n\text{ est une puissance de }b)$. Puisque $f \in O(n^{\log_ba-\epsilon})$, il existe $n_0 \in \mathbb{N}$, $d\in \mathbb{R}^{>0}$ telles que $f(n) \leq dn^{\log_ba-\epsilon}$ pour tout $n\geq n_0$.
+		
+		Soit $i\geq \max(n_0,k_0)$, alors:
+		\begin{align*}
+			g(b^i)&= \frac{f(b^i)}{a^i} \\
+			&\leq \frac{d(b^i)^{\log_ba-\epsilon}}{a^i} &&\text{car $f(n)\in O(n^{\log_b(a) -\epsilon})$}\\
+			&=\frac{d}{b^{\epsilon i}}. &&\text{car $(b^i)^{\log_b(a)-\epsilon }= \frac{(b^i)^{\log_b(a)}}{(b^i)^\epsilon} =\frac{(b^{\log_b(a)})^i}{b^{i\epsilon}} = \frac{a^i}{b^{i\epsilon}}     $}			
+		\end{align*}
+		
+		Ainsi pour $k\geq \max(n_0,k_0)$, nous avons
+		
+		\begin{align*}
+			T(b^k)& = a^k\left[g(b^{k_0})+g(b^{k_0+1})+...+g(b^{k})\right] \\
+			&= a^k\left[\sum_{i=k_0}^{\max(n_0,k_0)-1}g(b^i) + \sum_ {i=\max(n_0,k_0)}^k g(b^i)\right]\\
+			&\leq a^k\left[\sum_{i=k_0}^{\max(n_0,k_0)-1}g(b^i) + \sum_ {i=\max(n_0,k_0)}^k d/b^{\epsilon i}\right]\\
+			&\leq a^k\underbrace{\left[\sum_{i=k_0}^{\max(n_0,k_0)-1}g(b^i) + d/(1-(1/b^{\epsilon}))\right]}_{\text{une constante}} &&\text{par la série géométrique, $\sum_{j=0}^\infty a^j = \frac{1}{1-a}$ lorsque $|a|<1$}.
+		\end{align*}
+		
+		Puisque $a^k=(b^k)^{\log_ba}$, nous concluons que $T \in O(n^{\log_ba}: n\text{ est une puissance de }b)$ et donc nous avons  $T \in \Theta(n^{\log_b a} : n\text{ est une puissance de }b)$.
+	\end{solution}
+\section{}
+
+\begin{question}
+	Borner la récurrence suivante pour $n$ une puissance de $2$
+	\begin{equation*}
+	T(n)=\left\{
+	\begin{array}{ll}
+	1 & \text{si } n=1,\\
+	2T(n/2)+\log n & \text{sinon }
+	\end{array} \right.
+	\end{equation*}	
+\end{question}
+
+\begin{solution}
+	Nous pouvons utiliser le lemme des puissances de $b$ (le cas prouvé à la question précédente). Si $n=2^k$ nous avons
+	\begin{equation*}
+	T(2^k)=\left\{
+	\begin{array}{ll}
+	1 & \text{si } k=0,\\
+	2T(2^{k-1})+k & \text{sinon }
+	\end{array} \right.
+	\end{equation*}
+	Nous retrouvons le cas général du lemme avec $a=2, b=2, \log_b a=\log_2 2 = 1$ et $f(n) = \log (n)$. Comme nous pouvons borner $f(n)$ par $\sqrt{n}$, nous pouvons appliquer le cas 1 du lemme avec $\epsilon = 1/2$. En effet, nous avons trouvé $\epsilon > 0$ tel que $f(n) \in O(n^{\log_b a-\epsilon})$, car $O(n^{\log_2 2-(1/2)})=O(\sqrt{n})$. Cela implique que $T(n) \in \Theta(n^{log_b a}: n \text{ est une puissance de }b)=\Theta(n: n \text{ est une puissance de }2)$.
+\end{solution}	
+
+\section{}
+	
+	\begin{question}
+		Montrer que toutes les conditions afin d'appliquer la règle d'harmonie sont nécessaires. Plus précisément, exhiber $b\geq 2$, et $f, t: \mathbb{N}\rightarrow\mathbb{R}^{\geq 0}$ telles que $t(n) \in \Theta(f(n): n\text{ est une puissance de }b)$, mais $t \notin \Theta(f)$. Donner trois paires de fonctions $f,t$ sujettes aux conditions additionnelles suivantes:
+		\begin{enumerate}
+			\item {$f$ est harmonieuse, mais $t$ n'est pas éventuellement non décroissante}
+			\item {$f$ et $t$ sont éventuellement non décroissantes mais $f(bn) \notin O(f(n))$}
+			\item{$f(b(n)) \in O(f(n))$ et $t$ est éventuellement non décroissante mais $f$ n'est pas éventuellement non décroissante.}
+		\end{enumerate}
+	\end{question}
+	\textcolor{red}{Note : "Trouver" les fonctions peut demander d'être assez astucieux. L'important est de comprendre pourquoi les fonctions fournies prouvent la nécessité de chacune des conditions. Avant d'utiliser la règle de l'harmonie, il faut donc prouver qu'on puisse l'appliquer en justifiant chacune des conditions sur les fonctions $t$ et $f$.}
+	
+	
+	\begin{solution}
+		\begin{enumerate}
+			\item {\underline{Nécessité de $t$ é.n.d.:} Soient $f(n)=n$ et
+				\begin{equation*}
+					t(n)=\left\{
+					\begin{array}{ll}
+						n & \text{si } n \text{ est une puissance de }b,\\
+						1 & \text{sinon }
+					\end{array} \right.
+				\end{equation*}	
+				Lorsque $n$ est une puissance de $b$, nous avons $t(n)=f(n)=n$. Montrons que $t \notin \Theta(f)$. Supposons le contraire par l'absurde. Alors il existe $n_0\in \mathbb{N}, c \in \mathbb{R}^{>0}$ telles que $\forall n \geq n_0$ nous avons $t(n) \geq cf(n)$. Soit $m > \max(n_0, 1/c)$ un nombre qui ne soit pas une puissance de $b$. Selon notre supposition, nous avons $t(m) \geq cf(m)=cm > c\frac{1}{c}=1$. Or par définition $t(m)=1$, ce qui est une contradiction avec ce qui précède.}
+			\item{\underline{Nécessité de $f(bn) \in O(f(n)))$:} Soient $b=2$,
+				\begin{align*}
+					t(n)&=2^{n\lceil\log n\rceil},\\
+					f(n)&=2^{n\lfloor\log n\rfloor}.
+				\end{align*}
+				Par définition, $t$ et $f$ sont non décroissantes, et nous avons $t(2^i)=f(2^i)=2^{2^i i}$. Supposons que $f(2n)\in O(f(n))$, alors $\exists n_0, c\in \mathbb{R}^{>0}$ telles que $\forall n \geq n_0$ nous avons $f(2n)\leq cf(n)$. Posons $m=\max(n_0, \lceil c \rceil+1)$. Nous avons $f(2^{m+1})/f(2^m)\leq c$, or
+				$$\frac{f(2^{m+1})}{f(2^m)}=\frac{2^{2^{m+1}(m+1)}}{2^{2^m m}}\geq \frac{2^{2^{m+1}(m+1)}}{2^{2^{m+1} m}}=2^{2^{m+1}}\geq m > c,$$
+				ce qui est une contradiction.
+				
+				Montrons maintenant que $t\notin \Theta(f)$. Supposons que $t\in \Theta(f)$, alors $\exists n_0\in \mathbb{N}, c \in \mathbb{R}^{>0}$ telles que $\forall n\geq n_0$ nous avons $t(n)\leq cf(n)$. Posons $m=\max(n_0, \lceil c \rceil+1)$. Nous avons $t(2^m +1)/f(2^m + 1)\leq c$, or
+				$$\frac{t(2^{m}+1)}{f(2^m+1)}=\frac{2^{(2^m+1)(m+1) }}{2^{(2^m+1) m}}=2^{2^{m+1}}\geq m > c,$$
+				ce qui est une contradiction. Ainsi, $t\notin \Theta(f).$
+			}
+			\item{\underline{Nécessité de $f$ é.n.d.:} Soient $t(n)=n$ et
+				\begin{equation*}
+					f(n)=\left\{
+					\begin{array}{ll}
+						n & \text{si } n \text{ est une puissance de }b,\\
+						1 & \text{sinon }
+					\end{array} \right.
+				\end{equation*}	
+				Lorsque $n$ est une puissance de $b$, nous avons $t(n)=f(n)=n$. De plus, $f(bn) \in O(f(n))$. En effet, si  $n=b^k$ nous avons
+				$$f(bn)=f(b^{k+1})=b^{k+1}=bf(b^k)=bf(n),$$
+				et si $n$ n'est pas une puissance de $b$ nous avons
+				$$f(bn)=1\leq b= bf(n).$$
+				Or, $t \notin \Theta(f)$, par un argument similaire à celui donné au point 1.
+			}
+		\end{enumerate}
+	\end{solution}
+	
+
+\section{}
+	\begin{question}
+		Considérez une fonction $t : \mathbb{N}\rightarrow \mathbb{R}^{>0}$ éventuellement non décroissante telle que
+		$$\forall n \geq n_0 \qquad t(n) \leq t(\lfloor n/2\rfloor) + t(\lceil n/2\rceil) + t(1 + \lceil n/2\rceil) + cn.$$
+		Bornez $t$ grâce à la notation $O$.
+	\end{question}
+
+\textcolor{red}{Note : Numéro pas montré en démo, mais tout de même important, car il s'agit du seul numéro de la démo qui porte sur le théorème des récurrences asymptotiques. Le début de la solution ne sert "qu'à" mettre la borne supérieure de la récurrence sous la forme désirée par le théorème des récurrences asymptotiques. Le théorème est ensuite appliqué à la toute fin pour déterminer l'ordre $O$}
+	\begin{solution}
+		Soit $m_0$ le seuil à partir duquel $t$ est non décroissante. Soit $n\geq \max(2m_0,n_0)$, alors $\lfloor n/2 \rfloor \geq m_0$. Ainsi $t(\lfloor n/2\rfloor) \leq t(\lceil n/2\rceil) \leq t(1 + \lceil n/2\rceil) $ et du coup
+		\begin{equation}
+			t(n)\leq 3t(1+ \lceil n/2 \rceil)+cn.
+		\end{equation}
+		Posons $T(n)=t(n+2)$. Soit $n\geq \max(2m_o,n_0)$, alors
+		\begin{align*}
+			T(n)&=t(n+2)\\
+			&\leq 3t(1+\lceil (n+2)/2\rceil) + c(n+2) \\
+			&=3t(2+\lceil n/2 \rceil)+c(n+2)\\
+			&\leq 3t(2+\lceil n/2 \rceil)+c\cdot 2n\\
+			&= 3T(\lceil n/2 \rceil)+2cn.
+		\end{align*}
+		
+		Ainsi, $T(n)\leq 3T(\lceil n/2 \rceil) +(2c)n$ pour tout $n \geq \max(2m_0,n_0)$. En appliquant un théorème vu en classe (théorème sur les récurrences asymptotiques) avec 
+		$$a=3, b=2, f(n)=n, \epsilon=1/2>0$$
+		nous obtenons $T \in O(n^{\log_2 3})$. Puisque $t(n)=T(n-2)\leq T(n)$, nous concluons que $t \in O(n^{\log_2 3})=O(n^{1.585})$.
+	\end{solution}
+
+	
+\section{}
+\begin{question}
+	Résoudre la récurrence suivante exactement
+	\begin{equation}
+	\label{tn}
+	t_n=\begin{cases}
+	n & \text{$n=0$ ou $n=1$}\\
+	5t_{n-1}-6t_{n-2}&n\geq 2
+	\end{cases}
+	\end{equation}
+	et exprimer de façon en utilisant la notation $\Theta$ (le plus simplement possible).	
+\end{question}
+
+
+\textcolor{green}{I}\textcolor{red}{M}\textcolor{blue}{P}\textcolor{green}{O}\textcolor{red}{R}\textcolor{blue}{T}\textcolor{green}{A}\textcolor{red}{N}\textcolor{blue}{T}
+\textcolor{blue}{
+	Pour résoudre une récurrence, il faut suivre les étapes suivantes:
+	\begin{enumerate}
+		\item Écrire le polynôme caractéristique
+		\begin{itemize}
+			\item S'il s'agit d'une relation de récurrence homogène, c'est-à-dire qu'elle s'écrit sous la forme
+			$$a_0t_n + a_1 t_{n-1} +a_2t_{n-2} + \dots + a_kt_{n-k} = 0,$$
+			alors le polynôme caractéristique sera $a_0r^n + a_1 r^{n-1}+ a_2r^{n-2}+\dots + a_k r^{n-k}=0$, qui peut se réécrire sous la forme suivante (en divisant par $r^{n-k}$):
+			$$a_0r^k + a_1 r^{k-1}+a_2r^{k-2}+\dots + a_{k-1}r^1+a_k = 0$$
+			\item S'il s'agit d'une relation de récurrence non-homogène homogène, c'est-à-dire qu'elle s'écrit sous la forme
+			$$a_0t_n + a_1 t_{n-1} +a_2t_{n-2} + \dots + a_kt_{n-k} = b_1^np_1(n)+b_2^n p_2(n) + \dots,$$
+			où les $p_i(n)$ sont des polynômes de degré $d_i$, alors le polynôme caractéristique sera sous la forme suivante (en divisant par $r^{n-k}$):
+			$$(a_0r^k + a_1 r^{k-1}+a_2r^{k-2}+\dots +a_{k-1}r^1+ a_k)(r-b_1)^{1+d_1}(r-b_2)^{1+d_2}\dots = 0$$
+		\end{itemize}
+		\item Trouver les racines du polynômes
+		\item Écrire la forme générale
+		\begin{itemize}
+			\item Si les racines sont toutes distinctes, alors la forme générale est $$t_n = \sum_{i=1}^k c_ir_i^n= c_1r_1^n + c_2 r_2^n + \dots + c_k r_k^n,$$ où les $r_i$ sont les racines. \\
+			Par exemple, si le polynôme a comme racines $r_1 = 4$ et $r_2=8$, la forme générale sera $t_n = c_1\cdot 4^n + c_2\cdot 8^n$.
+			\item Si les racines ne sont pas toutes distinctes, alors la forme générale est $$t_n = \sum_{i=1}^\ell \sum_{j=0}^{m_i-1}c_{ij}n^jr_i^n,$$ où les $r_i$ sont les racines, chacune de multiciplicité $m_i$ (les constantes $c_{ij}$ seront à déterminer dans à la prochaine étape). \\
+			Par exemple, si le polynôme est $(x-6)^3(x-5)=0$, il a comme racines $r_1 = 6$ de multiciplicité 3 et $r_2=5$ de multiciplicité 1, et la forme générale sera $t_n = c_1\cdot 6^n+c_2\cdot n\cdot 6^n + c_3 n^2 \cdot6^n + c_4\cdot 5^n$. Notons qu'un polynôme de degré $k$ aura toujours $k$ racines (et donc la somme des multiciplicités de chacune des racines doit toujours donner $k$.)
+		\end{itemize}
+		\item Trouver les constantes $c_1, c_2, ..c_k$ à l'aide des conditions initiales ($t_0 = .., t_1=.., t_k = ..$). Lorsque le polynôme caractéristique est de degré $k$, il s'agit d'un système linéaire de $k$ équations et $k$ inconnues, qui peut être résolu de multiples façons (substitution des équations dans les autres, avec la forme matricielle, etc.).
+		\item Écrire la récurrence avec les constantes trouvées
+		\item Si demandé, trouver la notation $\Theta$ correspondant à la solution trouvée et prouver la réponse (à l'aide d'une limite, par exemple).
+	\end{enumerate}
+}
+\begin{solution}
+	\begin{enumerate}
+		\item Pour $n>1$, nous avons $t_n-5t_{n-1}+6t_{n-2}=0$. Il s'agit d'une équation homogène, donc le polynôme charactéristique de la récurrence est $$p(x)=(x^2-5x+6)=0.$$
+		\item Puisqu'on peut réécrire le polynôme sous la forme $p(x) = x^2-5x-6 = (x-2)(x-3)=0$, alors les racines sont $x_1 = 2$ et $x_2 = 3$.
+		\item Puisqu'on a uniquement des racines distinctes, alors la forme générale de la solution est
+		$$t_n = c_1 x_1^n + c_2 x_2^n = c_1 2^n + c_2 3^n$$
+		\item Trouvons maintenant les valeurs des constantes $c_1$ et $c_2$.
+	Utilisant les conditions initiales données par (\ref{tn}) et la forme générale de la solution, nous obtenons le système suivant
+	\begin{equation*}
+	\begin{array}{ccccccccc}
+	t_0 & = & c_1 & + & c_2 &=& 0,\\
+	t_1 & = & 2c_1& + & 3c_2& = & 1,
+	\end{array}
+	\end{equation*}
+	Comme nous avons
+	\begin{equation*}
+	\left[\begin{array}{cc|c}
+	1 & 1 & 0\\
+	2 & 3 & 1
+	\end{array}\right] \sim \left[\begin{array}{cc|c}
+	1 & 0  & -1\\
+	0 & 1  & 1
+	\end{array}\right]
+	\end{equation*}
+	Nous avons donc $c_1 = -1$ et $c_2 = 1$.
+	\item 	Nous obtenons donc la solution finale $t_n=(-1)\cdot2^n +3^n = -2^n+3^n.$
+	\item Puisque $$\lim_{n\rightarrow \infty}\frac{- 2^n +3^n}{3^n} = 1+ \lim_{n\rightarrow \infty}-\left(\frac{2}{3}\right)^n = 1+0 \in \Re,$$ alors $t_n \in \Theta(3^n).$ 
+\end{enumerate}
+\end{solution}
+	
+\section{}
+\begin{question}
+	Résoudre la récurrence suivante exactement
+	\begin{equation}
+	\label{tn}
+	t_n=\begin{cases}
+	n & \text{$n=0,1,2,3$}\\
+	2t_{n-1}-2t_{n-3}+t_{n-4}&n\geq 4
+	\end{cases}
+	\end{equation}
+	et exprimer de façon en utilisant la notation $\Theta$ (le plus simplement possible).	
+\end{question}
+\begin{solution}
+	\begin{enumerate}
+		\item Pour $n>3$, nous avons $t_n-2t_{n-1}+2t_{n-3}-t_{n-4}=0$. Il s'agit d'une équation homogène, donc le polynôme charactéristique de la récurrence est $$p(x)=(x^4+2x^3 + 2x - 1)=0.$$
+		\item Puisqu'on peut réécrire le polynôme sous la forme $$p(x) =(x^4+2x^3 + 2x - 1) = (x-1)^3(x+1)=0,$$ alors les racines sont $x_1 = 1$ (de multiciplicité 3) et $x_2 = -1$ (de multiciplicité 1).
+		\item Puisqu'on a des racines multiples, alors la forme générale de la solution est
+		$$t_n = c_1 1^n + c_2n 1^n+c_3n^2 1^n+c_4(-1)^n = c_1 + c_2 n + c_3 n^2 + (-1)^n c_4$$
+		\item Trouvons maintenant les valeurs des constantes $c_1$, $c_2, c_3$ et $c_4$.
+		Utilisant les conditions initiales données par (\ref{tn}) et la forme générale de la solution, nous obtenons le système suivant
+		\begin{equation*}
+		\begin{array}{ccccccccccc}
+		t_0 & = & c_1 & + &  & + && + & c_4 &=& 0\\
+		t_1 & = & c_1& + & c_2&  + & c_3 & - & c_4 &= & 1\\
+		t_2 & = & c_1& + & 2c_2&  + & 4c_3 & + & c_4 &= & 2\\
+		t_3 & = & c_1& + & 3c_2&  + & 9c_3 & - & c_4 &= & 3,
+		\end{array}
+		\end{equation*}
+		Comme nous avons
+		\begin{equation*}
+		\left[\begin{array}{cccc|c}
+	
+		1 & 0 & 0 & 1 & 0\\
+		1 & 1 & 1 & -1 & 1\\
+		1 & 2 & 4 & 1 & 2\\
+		1 & 3 & 9 & -1 & 3\\
+		\end{array}\right] \sim \left[\begin{array}{cccc|c}
+		1 & 0 & 0 & 0 & 0\\
+		0 & 1 & 0 & 0 & 1\\
+		0 & 0 & 1 & 0 & 0\\
+		0 & 0 & 0 & 1 & 0\\
+		\end{array}\right]
+		\end{equation*}
+		Nous avons donc $c_1=c_3=c_4 = 0$ et $c_2 = 1$.
+		\item 	Nous obtenons donc la solution finale $t_n= c_2n\cdot (1)^n = n$
+		\item Évidemment, on a $t_n = n \in \Theta(n)$.
+	\end{enumerate}
+\end{solution}
+	
+	\section{}
+	\begin{question}
+		Résoudre la récurrence suivante exactement
+		\begin{equation}
+			\label{tn}
+			t_n=\left\{
+			\begin{array}{ll}
+				n+1 & \text{si } n=0 \text{ ou si } n=1,\\
+				3t_{n-1}-2t_{n-2}+3\cdot 2^{n-2} & \text{sinon }
+			\end{array} \right.
+		\end{equation}	
+	\end{question}
+	\begin{solution}
+		Pour $n>1$, nous avons $t_n-3t_{n-1}+2t_{n-2}=(3/4)\cdot 2^n$. Ainsi le polynôme charactéristique de la récurrence est 
+		$$p(x)=(x^2-3x+2)(x-2),$$ 
+		car $b_1 = 2$ et $p_1(n)= \frac{3}{4}$ est de degré $d_1=0$ (et donc l'exposant de $(x-b_1)$ sera $1+d_1=1$). On peut réécrire le polynôme ainsi
+		$$p(x)=(x-1)(x-2)(x-2),$$
+		Les racines sont 1 (de multiciplicité 1) et 2 (de multiplicité 2). La racine 2 engendre
+		$$(c_1+c_2n)\cdot 2^n$$
+		et la racine 1 engendre
+		$$c_3 \cdot 1^n.$$
+		Ainsi,
+		\begin{equation*}
+			t_n=c_12^n+c_22^nn+ c_3.
+		\end{equation*}
+		Utilisant les conditions initiales données par (\ref{tn}) nous obtenons le système suivant
+		\begin{equation*}
+			\begin{array}{ccccccccc}
+				t_0 & = & c_1 & + & & & c_3 &=& 1,\\
+				t_1 & = & 2c_1& + & 2c_2& + & c_3 & = & 2, \\
+				t_2 & = & 4c_1& + &8c_2 & + & c_3 & = & 7.
+			\end{array}
+		\end{equation*}
+		Comme nous avons
+		\begin{equation*}
+			\left[\begin{array}{ccc|c}
+				1 & 0 & 1 & 1\\
+				2 & 2 & 1 & 2\\
+				4 & 8 & 1 & 7
+			\end{array}\right] \sim \left[\begin{array}{ccc|c}
+			1 & 0 & 0 & -2\\
+			0 & 1 & 0 & 3/2\\
+			0 & 0 & 1 & 3
+		\end{array}\right]
+	\end{equation*}
+	Nous obtenons donc $t_n=-2 \cdot 2^n +(3/2)2^n n + 3 = (3n-4)2^{n-1}+ 3.$
+\end{solution}
+
+\section{}
+\begin{question}
+	Résoudre la récurrence suivante exactement
+	\begin{equation*}
+		T(n)=\left\{
+		\begin{array}{ll}
+			a & \text{si } n=0 \text{ ou si } n=1,\\
+			T(n-1)+T(n-2)+c & \text{sinon }
+		\end{array} \right.
+	\end{equation*}	
+\end{question}
+
+
+\textcolor{red}{Similaire à la question précédente, mais avec des racines \textit{funky}. On utilise $\phi$ et ($1-\phi$) simplement pour ne pas avoir à écrire partout $\frac{1\pm \sqrt{5}}{2}$.}
+\begin{solution}
+	Pour $n>1$, nous avons $T(n)-T(n-1)-T(n-2)=c=1^n c$. Ainsi le polynôme charactéristique de la récurrence est $p(x)=(x^2-x-1)(x-1)$. Ainsi les racines de $p$ sont 1 et $\frac{1\pm \sqrt{5}}{2}$, toutes de multiplicité 1. Dénotant $\phi=\frac{1+ \sqrt{5}}{2}$, nous avons
+	\begin{equation*}
+		T(n)= c_1 + c_2 \phi ^n + c_3 (1-\phi)^n.
+	\end{equation*}
+	Nous obtenons le système
+	\begin{equation*}
+		\begin{array}{ccccccccc}
+			T(0) & = & c_1 &+ & c_2& +& c_3&=& a,\\
+			T(1) & = & c_1& + & c_2\phi& + & c_3(1-\phi) & = & a, \\
+			T(2) & = & c_1& + &c_2\phi^2 & + & c_3(1-\phi)^2 & = & 2a+c.
+		\end{array}
+	\end{equation*}
+	Nous pouvons résoudre le système soit en appliquant directement l'algorithme de Gauss-Jordan comme précédemment sur la matrice
+	\begin{equation*}
+		\left[\begin{array}{ccc|c}
+			1 & 1 & 1 & a\\
+			1 & \phi & 1-\phi & a\\
+			1 & \phi^2 & (1-\phi)^2 & 2a+c
+		\end{array}\right]
+	\end{equation*}
+	soit en procédant d'abord par substitution, ce qui donne:
+	$$c_1=a-c_2-c_3$$
+	Le système devient alors
+	\begin{align*}
+		(\phi-1)c_2-\phi c_3 &= 0\\
+		(\phi^2-1)c_2 + (\phi^2-2\phi)c_3 &=a+c
+	\end{align*}
+	Avec Gauss-Jordan nous obtenons
+	\begin{align*}
+		&\left[\begin{array}{cc|c}
+			\phi-1 & -\phi & 0 \\
+			\phi^2 -1 & \phi^2-2\phi & a+c 
+		\end{array}\right] \sim \left[\begin{array}{cc|c}
+		1 & \frac{-\phi}{\phi-1} & 0\\
+		0 & \phi(2\phi -1) & a+c 
+	\end{array}\right]\\
+	\sim &\left[\begin{array}{cc|c}
+		1 & 0 & \frac{a+c}{(\phi-1)(2\phi-1)}\\
+		0 & 1 & \frac{a+c}{\phi(2\phi-1)} 
+	\end{array}\right]
+\end{align*}
+Comme $2\phi -1=\sqrt{5}$ et $\phi(1-\phi)=-1$, nous obtenons $c_1= -c, c_2=\phi(a+c)/\sqrt{5}, c_3=-(1-\phi)(a+c)/\sqrt{5}$. Nous concluons que $T(n)=-c+\frac{a+c}{\sqrt{5}}\phi^{n+1}-\frac{a+c}{\sqrt{5}}(1-\phi)^{n+1}$.
+\end{solution}
+
+\end{document}

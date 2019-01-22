@@ -1,0 +1,206 @@
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{1em}
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+	language=Python,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+
+\newenvironment{question}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Question #1:}
+	\noindent}
+{\medskip}
+
+\newenvironment{solution}[1][\unskip]{%
+	\par
+	\noindent
+	\textbf{Solution #1:}
+	\noindent}
+{\medskip}
+
+\begin{document}
+		
+	\leftline{\bfseries Introduction à l'algorithmique \hfill Automne 2017}
+	
+	\noindent \hrulefill
+	
+	\leftline{IFT2125-6001 \hfill TA: Stéphanie Larocque}
+	\centerline{\bfseries Démonstration 3}
+	\centerline{À partir des corrigés de Maelle Zimmermann}
+	\noindent \hrulefill
+	
+	\vspace{1cm}
+	
+	\section{}
+	\begin{question}
+		Un démonstrateur enseigne initialement à $n$ étudiants. À chaque semaine, au
+		moins le quart de ses étudiants abandonnent le cours. Estimer le nombre de semaines, au
+		maximum, qui s’écouleront avant qu’il ne reste plus personne au cours.
+	\end{question}
+	\begin{solution}
+		Le nombre maximum de semaine s'écoulera si le nombre minimum d'étudiants abandonne le cours chaque semaine. Ce nombre minimum est par définition le quart, donc $\lceil\frac{n}{4}\rceil$, car le nombre d'étudiants doit être entier.
+		
+		Nous définissons une fonction $T: \mathbb{N} \rightarrow \mathbb{N}$ qui fait correspondre à un nombre d'étudiants initial le nombre de semaines maximal que peut durer le cours avant d'être vide. Nous définissons $T$ récursivement ainsi:
+		\begin{equation}
+		T(n)=\left\{
+		\begin{array}{ll}
+		0 & \text{if } n= 0,\\
+		T(n-\lceil\frac{n}{4}\rceil)+1 & \text{if } n> 0
+		\end{array} \right.
+		\end{equation}	
+		Comme $T$ est sous forme récursive, il faut l'analyser pour connaître le nombre maximal de semaines en fonction du nombre initial d'étudiants. On note d'abord que $n-\lceil\frac{n}{4}\rceil = \lfloor\frac{3n}{4}\rfloor$.
+		
+		\textbf{Idée:} montrons, par induction, que pour tout $i \geq 4$ nous avons $T(4^i) \leq 5(i-4) + T(4^4).$
+		
+		\underline{Cas de base: $i=4$:} Nous avons $T(4^4) \leq 5(4-4) + T(4^4).$
+		
+		\underline{Etape d'induction:} Soit $i > 4$. Supposons que la proposition soit vraie pour $i - 1$. Nous avons		
+		\begin{align*}
+		T(4^i)&= T(3\cdot 4^{i-1})+1 \quad&\text{par déf. de }T\\
+		&= T(3^2\cdot 4^{i-2})+2 \quad&\text{par déf. de }T\\
+		&= T(3^3\cdot 4^{i-3})+3 \quad&\text{par déf. de }T\\
+		&= T(3^4\cdot 4^{i-4})+4 \quad&\text{par déf. de }T\\
+		&= T(3^5\cdot 4^{i-5})+5 \quad&\text{par déf. de }T\\
+		&= T((\frac{3}{4})^5 4^{i}) + 5\\
+		&\leq T(4^{i-1}) + 5 \quad&\text{car } T\text{ non décroissante et }(\frac{3}{4})^5\leq \frac{1}{4}\\
+		&=5(i-1-4)+T(4^4)+5 \quad&\text{par hyp. d'ind.}\\
+		&=5(i-4)+T(4^4).
+		\end{align*}
+		Cela conclut la preuve par induction. Ainsi, $\forall n\in \mathbf{N}$ tel que $n=4^i$ pour un certain $i$, nous avons $T(n)\leq 5(\log_4 n -4)+T(4^4)$. Nous obtenons donc que $T(n)\in O(\log_4 n:n=4^i)$. Comme la fonction $\log_4 n$ est 4-harmonieuse et que $T$ est non décroissante, nous concluons que $T(n)\in O(\log_4 n)=O(\log n)$.
+	\end{solution}
+	
+	\section{}
+	\begin{question}
+		Est-ce que la fonction $t: \mathbb{N} \rightarrow \mathbb{R}^{\geq 0}$ suivante
+		\begin{equation*}
+		t(n)=\left\{
+		\begin{array}{ll}
+		a_0 & \text{si } n= 0,\\
+		a_1 & \text{si } n=1 \\
+		t(\lfloor \frac{n}{b} \rfloor)+f(n)& \text{si } n>1
+		\end{array} \right.
+		\end{equation*}
+		est éventuellement non décroissante pour tout $a_0,a_1 \in \mathbb{R}^{\geq 0}$, pour tout $b \in \mathbb{N}$ et pour toute fonction $f$ non décroissante?
+	\end{question}
+	
+	\begin{solution}
+		Non. Nous pouvons trouver un contre-exemple. Considérons la fonction suivante:
+		\begin{equation*}
+		t(n)=\left\{
+		\begin{array}{ll}
+		1 & \text{si } n= 0,\\
+		0 & \text{si } n=1 \\
+		t(\lfloor \frac{n}{3} \rfloor)& \text{si } n>1
+		\end{array} \right.
+		\end{equation*}
+		Montrons par induction sur $i$ que $t(3^i)=0$ et $t(2\cdot 3^i)=1$.
+		
+		\underline{Cas de base: $i=0:$} 
+		\begin{align*}
+		&t(3^0)=t(1) =0\\
+		&t(2\cdot 3^0)=t(2)=t(\lfloor \frac{2}{3} \rfloor)=t(0)=1
+		\end{align*}
+		
+		\underline{Etape d'induction:} Soit $i>0$. Supposons que la proposition est vraie pour $i-1$ et montrons qu'elle est vraie pour $i$.
+		\begin{align*}
+		t(3^i)&=t(3^{i-1}) \quad&\text{par déf. de }t\\ 
+		&=0 \quad&\text{par hyp. d'ind.}\\
+		t(2\cdot 3^i)&=t(2\cdot 3^{i-1}) \quad&\text{par déf. de }t\\
+		&=1 \quad&\text{par hyp. d'ind.}
+		\end{align*}
+		Cela prouve la proposition par induction. Supposons maintenant par l'absurde que $t$ est éventuellement non décroissante. Par définition, $\exists n_0 \in \mathbf{N}$ tel que $\forall n, n' \geq n_0$, $n'\geq n \rightarrow t(n') \geq t(n)$. Or prenons $n=2\cdot 3^{n_0}$ et $n'=3^{n_0+1}$. Nous avons bien $n' \geq n$. En revanche nous obtenons $0=t(n') < t(n)=1$, ce qui est une contradiction.
+	\end{solution}
+	
+	\section{}
+	\begin{question}
+		Prouver que la fonction $t: \mathbb{N} \rightarrow \mathbb{R}^{\geq 0}$ suivante est éventuellement non décroissante:
+		\begin{equation*}
+		t(n)=\left\{
+		\begin{array}{ll}
+		d & \text{si } 0\leq n \leq n_0,\\
+		a_1 t(\lceil \frac{n}{b} \rceil)+ a_2t(\lfloor \frac{n}{b} \rfloor)+cf(n)& \text{si } n>n_0
+		\end{array} \right.
+		\end{equation*}
+		où $n_0>0,\ c,d \in \mathbb{R}^{\geq 0}, \ a_1,a_2,b \in \mathbb{N}, \ a_1+a_2\geq 1, \ b\geq 2$ et $f: \mathbb{N}\rightarrow\mathbb{R}^{\geq 0}$ est non décroissante.
+	\end{question}
+	\textcolor{red}{Notons que nous avons prouvé $n_0=1$ en classe}
+	\begin{solution}
+		Montrons par induction sur $n$ que $t(n+1)\geq t(n)$ pour tout $n \geq n_0$.
+		
+		\underline{Cas de base: $n=n_0$: }
+		\begin{align*}
+		t(n_0+1 )&=a_1 t(\lceil \frac{n_0+1}{b} \rceil)+ a_2t(\lfloor \frac{n_0+1}{b} \rfloor)+cf(n_0+ 1)& \text{par déf. de }t\\
+		&=a_1 t(k_1)+ a_2t(k_2)+cf(n_0+ 1)& \text{où }k_1,k_2\leq n_0\text{ car } n_0+1\geq 2 \text{ et }b\geq 2\\
+		&=(a_1+a_2)d + cf(n_0+1)& \text{par déf. de }t\\
+		&\geq (a_1+a_2)d&\text{car }c\geq 0 \text{ et }f \text{ non nég.}\\
+		&\geq d&\text{car }a_1+a_2\geq 1\\
+		&=t(n_0)& \text{par déf. de }t
+		\end{align*}
+		
+		\underline{Etape d'induction: }Soit $n>n_0$. On suppose que la proposition est vraie pour tout $n_0\leq k< n$. Montrons que la proposition est vraie pour $n$:
+		\begin{align*}
+		t(n+1)&=a_1 t(\lceil \frac{n+1}{b} \rceil)+ a_2t(\lfloor \frac{n+1}{b} \rfloor)+cf(n+ 1)& \text{par déf. de }t\\
+		&\geq a_1 t(\lceil \frac{n+1}{b} \rceil)+ a_2t(\lfloor \frac{n+1}{b} \rfloor)+cf(n)& \text{car  }f \text{ non décroissante}\\
+		&\geq a_1 t(\lceil \frac{n}{b} \rceil)+ a_2t(\lfloor \frac{n}{b} \rfloor)+cf(n)& \text{car  }n,b \geq 2 \text{ et par hyp. d'ind.}\\
+		&=t(n)& \text{par déf. de }t
+		\end{align*}
+	\end{solution}
+	
+	\section{}
+	\begin{question}
+		Soit T le tableau résultant de l'algorithme d'appartenance à un groupe de permutations. Sachant qu'une permutation appartenant à ce groupe peut s'exprimer comme 
+		$$T[m,j_m]*T[m-1,j_{m-1}]* \dots *T[2,j_2]*T[1,j_1]$$
+		où $T[i,j]$ provient de la ième ligne de la diagonale supérieure du tableau, justifier que cette notation est unique. 
+	\end{question}
+	
+	\begin{solution}
+		Supposons qu'une permutation puisse s'écrire de deux façons distinctes comme produits d'éléments au dessus de la diagonale du tableau. Nous avons:		
+		\begin{align*}
+		a_m* a_{m-1}*\dots *a_2*a_1=b_m*b_{m-1}*\dots *b_2*b_1
+		\end{align*}
+		où $a_k$ et $b_k$ représentent des permutations de la ligne $k$. Soit $i$ le plus petit indice de ligne où $a_i\neq b_i$. Alors
+		\begin{align*}
+		a_m* a_{m-1}*\dots *a_i=b_m*b_{m-1}*\dots *b_i
+		\end{align*}
+		Notons que comme $a_i$ et $b_i$ sont deux permutations différentes de la ligne $i$ du tableau, elles n'envoient pas $i$ sur le même point, c'est-à-dire $i^{a_i}\neq i^{b_i}$. Multiplions ensuite l'égalité par $a_{i+1}^{-1}*\dots*a_{m}^{-1}$ de chaque côté:
+		\begin{align*}
+				a_i=a_{i+1}^{-1}*\dots*a_{m}^{-1}*b_m*b_{m-1}*\dots *b_{i+1}*b_i
+		\end{align*}
+		Comme les permutations de gauche et de droite sont identiques, elles envoient $i$ sur le même point. Par définition du tableau, les permutations $a_{i+1}, \dots, a_m, b_{i+1}, \dots, b_m$ fixent $i$, et leurs inverses également. Cela implique que l'image de $i$ par $a_{i+1}^{-1}*\dots*a_{m}^{-1}*b_m*b_{m-1}*\dots *b_i$ est $i^{b_i}$ (point sur lequel $b_i$ envoie $i$). Ainsi $i^{a_i}=i^{b_i}$.
+		
+		Ceci est une contradiction car $a_i$ et $b_i$ n'envoient pas $i$ sur le même point.
+	\end{solution}
+	
+\end{document}
